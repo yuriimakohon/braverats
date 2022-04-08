@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Prince",
+    "description": "You win the round",
+    "power": 7
+  },
+  {
+    "name": "General",
+    "description": "The card in your next round gets +2 strength",
+    "power": 6
+  },
+  {
+    "name": "Wizard",
+    "description": "Nullifies the special power of your opponent’s card",
+    "power": 5
+  },
+  {
+    "name": "Ambassador",
+    "description": "If you win with this card, it counts as 2 victories",
+    "power": 4
+  },
+  {
+    "name": "Assassin",
+    "description": "The lowest strength wins",
+    "power": 3
+  },
+  {
+    "name": "Spy",
+    "description": "Next round, your opponent reveals his card before  you choose yours",
+    "power": 2
+  },
+  {
+    "name": "Princess",
+    "description": "If your opponent plays the Prince, you automatically  win the game",
+    "power": 1
+  },
+  {
+    "name": "Musician",
+    "description": "This round is nullified and put on hold",
+    "power": 0
+  }
+]
