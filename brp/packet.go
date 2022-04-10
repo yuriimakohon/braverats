@@ -1,4 +1,4 @@
-package protocol
+package brp
 
 import (
 	"bufio"
@@ -7,7 +7,11 @@ import (
 	"io"
 )
 
-func ReadPacket(reader io.Reader) (tag TAG, args []byte, err error) {
+// Ending is used to separate packets in the stream.
+var Ending = []byte{0x00, 0xFF, 0xCC}
+
+// ReadPacket reads a packet from the given reader. Returns the tag and packet data separately.
+func ReadPacket(reader io.Reader) (tag TAG, data []byte, err error) {
 	var packet []byte
 	r := bufio.NewReader(reader)
 
@@ -26,12 +30,12 @@ func ReadPacket(reader io.Reader) (tag TAG, args []byte, err error) {
 	}
 
 	tagBytes := bytes.ToUpper(bytes.TrimSpace(bytes.Split(packet, []byte(" "))[0]))
-	args = bytes.TrimSpace(bytes.TrimPrefix(packet, tagBytes))
+	data = bytes.TrimSpace(bytes.TrimPrefix(packet, tagBytes))
 	tag = TAG(tagBytes)
 
-	if _, ok := TAGs[tag]; !ok {
+	if _, ok := tags[tag]; !ok {
 		return "", nil, errors.New("unknown tag: " + string(tag))
 	}
 
-	return tag, args, nil
+	return tag, data, nil
 }

@@ -1,7 +1,7 @@
 package server
 
 import (
-	"braverats/protocol"
+	"braverats/brp"
 	"io"
 	"log"
 	"net"
@@ -64,7 +64,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 	client := s.addClient(conn)
 
 	for {
-		tag, args, err := protocol.ReadPacket(client.conn)
+		tag, args, err := brp.ReadPacket(client.conn)
 		if err == io.EOF {
 			s.removeClient(client.id)
 			return
@@ -78,19 +78,19 @@ func (s *Server) handleConnection(conn net.Conn) {
 	}
 }
 
-func (s *Server) handleReq(tag protocol.TAG, args []byte, c *client) {
+func (s *Server) handleReq(tag brp.TAG, args []byte, c *client) {
 	switch tag {
-	case protocol.SetName:
+	case brp.TagSetName:
 		c.setName(args)
-	case protocol.CreateLobby:
+	case brp.TagCreateLobby:
 		c.createLobby(args)
-	case protocol.JoinLobby:
+	case brp.TagJoinLobby:
 		c.joinLobby(args)
-	case protocol.LeaveLobby:
+	case brp.TagLeaveLobby:
 		c.leaveLobby()
-	case protocol.SetReadiness:
+	case brp.TagSetReadiness:
 		c.setReadiness(args)
-	case protocol.StartMatch:
+	case brp.TagStartMatch:
 		c.startMatch()
 	}
 }

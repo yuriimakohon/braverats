@@ -1,7 +1,7 @@
 package server
 
 import (
-	"braverats/protocol"
+	"braverats/brp"
 	"log"
 	"net"
 
@@ -28,7 +28,7 @@ func newClient(conn net.Conn, server *Server) *client {
 	}
 }
 
-func (c *client) handleWriteErr(tag protocol.TAG, err error) {
+func (c *client) handleWriteErr(tag brp.TAG, err error) {
 	if err != nil {
 		log.Printf("client %s didn't receive an %s tag: %v", c.id, tag, err)
 	}

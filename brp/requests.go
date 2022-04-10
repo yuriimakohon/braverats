@@ -1,36 +1,36 @@
-package protocol
+package brp
 
 import "strconv"
 
 func ReqSetName(name string) []byte {
-	req := append([]byte(SetName), ' ')
+	req := append([]byte(TagSetName), ' ')
 	req = append(req, []byte(name)...)
 	return append(req, Ending...)
 }
 
 func ReqCreateLobby(name string) []byte {
-	req := append([]byte(CreateLobby), ' ')
+	req := append([]byte(TagCreateLobby), ' ')
 	req = append(req, []byte(name)...)
 	return append(req, Ending...)
 }
 
 func ReqJoinLobby(name string) []byte {
-	req := append([]byte(JoinLobby), ' ')
+	req := append([]byte(TagJoinLobby), ' ')
 	req = append(req, []byte(name)...)
 	return append(req, Ending...)
 }
 
 func ReqLeaveLobby() []byte {
-	req := append([]byte(LeaveLobby), ' ')
+	req := append([]byte(TagLeaveLobby), ' ')
 	return append(req, Ending...)
 }
 
 func ReqSetReadiness(ready bool) []byte {
-	req := append([]byte(SetReadiness), ' ')
+	req := append([]byte(TagSetReadiness), ' ')
 	req = append(req, []byte(strconv.FormatBool(ready))...)
 	return append(req, Ending...)
 }
 
 func ReqStartMatch() []byte {
-	return append([]byte(StartMatch), Ending...)
+	return append([]byte(TagStartMatch), Ending...)
 }
