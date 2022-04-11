@@ -2,35 +2,35 @@ package brp
 
 import "strconv"
 
-func ReqSetName(name string) []byte {
-	req := append([]byte(TagSetName), ' ')
+func NewReqSetName(name string) []byte {
+	req := append([]byte(ReqSetName), ' ')
 	req = append(req, []byte(name)...)
 	return append(req, Ending...)
 }
 
-func ReqCreateLobby(name string) []byte {
-	req := append([]byte(TagCreateLobby), ' ')
+func NewReqCreateLobby(name string) []byte {
+	req := append([]byte(ReqCreateLobby), ' ')
 	req = append(req, []byte(name)...)
 	return append(req, Ending...)
 }
 
-func ReqJoinLobby(name string) []byte {
-	req := append([]byte(TagJoinLobby), ' ')
+func NewReqJoinLobby(name string) []byte {
+	req := append([]byte(ReqJoinLobby), ' ')
 	req = append(req, []byte(name)...)
 	return append(req, Ending...)
 }
 
-func ReqLeaveLobby() []byte {
-	req := append([]byte(TagLeaveLobby), ' ')
+func NewReqLeaveLobby() []byte {
+	req := append([]byte(ReqLeaveLobby), ' ')
 	return append(req, Ending...)
 }
 
-func ReqSetReadiness(ready bool) []byte {
-	req := append([]byte(TagSetReadiness), ' ')
+func NewReqSetReadiness(ready bool) []byte {
+	req := append([]byte(ReqSetReadiness), ' ')
 	req = append(req, []byte(strconv.FormatBool(ready))...)
 	return append(req, Ending...)
 }
 
-func ReqStartMatch() []byte {
-	return append([]byte(TagStartMatch), Ending...)
+func NewReqStartMatch() []byte {
+	return append([]byte(ReqStartMatch), Ending...)
 }

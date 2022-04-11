@@ -1,41 +1,46 @@
 package brp
 
-// TAG is type of request or response in BRP protocol.
+// TAG is type of request, response and events in BRP protocol.
 type TAG string
 
-// Request BRP TAGs.
+// Client side request BRP TAGs.
 const (
-	TagSetName      TAG = "SET_NAME"
-	TagCreateLobby  TAG = "CREATE_LOBBY"
-	TagJoinLobby    TAG = "JOIN_LOBBY"
-	TagLeaveLobby   TAG = "LEAVE_LOBBY"
-	TagSetReadiness TAG = "SET_READINESS"
-	TagStartMatch   TAG = "START_MATCH"
+	ReqSetName      TAG = "SET_NAME"
+	ReqCreateLobby  TAG = "CREATE_LOBBY"
+	ReqJoinLobby    TAG = "JOIN_LOBBY"
+	ReqLeaveLobby   TAG = "LEAVE_LOBBY"
+	ReqSetReadiness TAG = "SET_READINESS"
+	ReqStartMatch   TAG = "START_MATCH"
 )
 
-// Response BRP TAGs.
+// Server side response BRP TAGs.
 const (
-	TagOk              TAG = "OK"
-	TagErr             TAG = "ERR"
-	TagJoinedLobby     TAG = "JOINED_LOBBY"
-	LeftLobby          TAG = "LEFT_LOBBY"
-	TagPlayerReadiness TAG = "PLAYER_READINESS"
-	TagMatchStarted    TAG = "MATCH_STARTED"
+	RespOk  TAG = "OK"
+	RespErr TAG = "ERR"
+)
+
+// Server side event BRP TAGs.
+const (
+	EventJoinedLobby     TAG = "JOINED_LOBBY"
+	EventLeftLobby       TAG = "LEFT_LOBBY"
+	EventPlayerReadiness TAG = "PLAYER_READINESS"
+	EventMatchStarted    TAG = "MATCH_STARTED"
 )
 
 // tags is a set of all BRP tags
 var tags = map[TAG]struct{}{
-	TagSetName:      {},
-	TagCreateLobby:  {},
-	TagJoinLobby:    {},
-	TagLeaveLobby:   {},
-	TagSetReadiness: {},
-	TagStartMatch:   {},
+	ReqSetName:      {},
+	ReqCreateLobby:  {},
+	ReqJoinLobby:    {},
+	ReqLeaveLobby:   {},
+	ReqSetReadiness: {},
+	ReqStartMatch:   {},
 
-	TagOk:              {},
-	TagErr:             {},
-	TagJoinedLobby:     {},
-	LeftLobby:          {},
-	TagPlayerReadiness: {},
-	TagMatchStarted:    {},
+	RespOk:  {},
+	RespErr: {},
+
+	EventJoinedLobby:     {},
+	EventLeftLobby:       {},
+	EventPlayerReadiness: {},
+	EventMatchStarted:    {},
 }

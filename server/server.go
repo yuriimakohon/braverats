@@ -80,17 +80,17 @@ func (s *Server) handleConnection(conn net.Conn) {
 
 func (s *Server) handleReq(tag brp.TAG, args []byte, c *client) {
 	switch tag {
-	case brp.TagSetName:
+	case brp.ReqSetName:
 		c.setName(args)
-	case brp.TagCreateLobby:
+	case brp.ReqCreateLobby:
 		c.createLobby(args)
-	case brp.TagJoinLobby:
+	case brp.ReqJoinLobby:
 		c.joinLobby(args)
-	case brp.TagLeaveLobby:
+	case brp.ReqLeaveLobby:
 		c.leaveLobby()
-	case brp.TagSetReadiness:
+	case brp.ReqSetReadiness:
 		c.setReadiness(args)
-	case brp.TagStartMatch:
+	case brp.ReqStartMatch:
 		c.startMatch()
 	}
 }
