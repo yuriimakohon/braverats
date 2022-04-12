@@ -19,6 +19,7 @@ type Server struct {
 func NewServer() *Server {
 	return &Server{
 		clients: make(map[uuid.UUID]*client, 0),
+		lobbies: make(map[string]*lobby, 0),
 	}
 }
 
@@ -51,9 +52,20 @@ func (s *Server) addClient(conn net.Conn) *client {
 }
 
 func (s *Server) removeClient(id uuid.UUID) {
-	c := s.clients[id]
-	if c.lobby != nil && c.lobbyOwner {
-		delete(s.lobbies, c.lobby.name)
+	c, ok := s.clients[id]
+	if !ok {
+		log.Printf("can't remove client %s doesn't exists", id.String())
+		return
+	}
+
+	if c.lobby != nil {
+		if c.lobbyOwner {
+			delete(s.lobbies, c.lobby.name)
+			// TODO: implement c.secondPlayer.lobbyDeleted()
+		} else {
+			c.lobby.secondPlayer = nil
+			c.lobby.firstPlayer.leftLobby(c.name)
+		}
 	}
 	c.conn.Close()
 	delete(s.clients, id)

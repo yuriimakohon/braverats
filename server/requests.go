@@ -50,6 +50,11 @@ func (c *client) joinLobby(args []byte) {
 		return
 	}
 
+	if c.lobby != nil {
+		c.err(errors.New("you are already in a lobby"))
+		return
+	}
+
 	lobby, ok := c.server.lobbies[string(args)]
 	if !ok {
 		c.err(errors.New("lobby with such name doesn't exists"))
@@ -61,7 +66,7 @@ func (c *client) joinLobby(args []byte) {
 	log.Printf("client %s joined lobby %s\n", c.id, lobby.name)
 
 	c.lobby.firstPlayer.joinedLobby(c.name)
-	c.joinedLobby(c.name)
+	c.ok()
 }
 
 func (c *client) leaveLobby() {
