@@ -104,14 +104,13 @@ func (c *client) setReadiness(args []byte) {
 		return
 	}
 
-	var currentPlayer, anotherPlayer *client
+	var currentPlayer = c
+	var anotherPlayer *client
 
 	if c.lobbyOwner {
-		currentPlayer = c
 		anotherPlayer = c.lobby.secondPlayer
 	} else {
-		currentPlayer = c.lobby.secondPlayer
-		anotherPlayer = c
+		anotherPlayer = c.lobby.firstPlayer
 	}
 
 	if currentPlayer.ready != ready {

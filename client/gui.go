@@ -20,6 +20,7 @@ const (
 	GIDDialQuitConfirm GID = iota
 	GIDDialCreateLobby
 	GIDDialJoinLobby
+	GIDDialLobby
 )
 
 type GUI struct {

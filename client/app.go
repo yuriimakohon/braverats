@@ -108,11 +108,11 @@ func (app *App) receiveResponse() (brp.Packet, error) {
 	}
 }
 
-func (app *App) receiveAndProcessResponse(tag brp.TAG, title string) {
+func (app *App) receiveAndProcessResponse(tag brp.TAG, title string) bool {
 	resp, err := app.receiveResponse()
 	if err != nil {
 		log.Printf("Error receiving %s request`s response: %v", tag, err)
-		return
+		return false
 	}
 
 	// Capitalize first letter of response message
@@ -123,8 +123,11 @@ func (app *App) receiveAndProcessResponse(tag brp.TAG, title string) {
 		log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
 	case brp.RespErr:
 		app.gui.serverErrDialog(fmt.Sprintf("%s :: %s : %s", tag, resp.Tag, msg))
+		return false
 	case brp.RespInfo:
 		log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
 		app.gui.applicationInfoDialog(title, msg)
+		return false
 	}
+	return true
 }
