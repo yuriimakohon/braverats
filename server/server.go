@@ -64,7 +64,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 	client := s.addClient(conn)
 
 	for {
-		tag, args, err := brp.ReadPacket(client.conn)
+		packet, err := brp.ReadPacket(client.conn)
 		if err == io.EOF {
 			s.removeClient(client.id)
 			return
@@ -74,22 +74,22 @@ func (s *Server) handleConnection(conn net.Conn) {
 			client.err(err)
 			continue
 		}
-		s.handleReq(tag, args, client)
+		s.handleReq(packet, client)
 	}
 }
 
-func (s *Server) handleReq(tag brp.TAG, args []byte, c *client) {
-	switch tag {
+func (s *Server) handleReq(packet brp.Packet, c *client) {
+	switch packet.Tag {
 	case brp.ReqSetName:
-		c.setName(args)
+		c.setName(packet.Payload)
 	case brp.ReqCreateLobby:
-		c.createLobby(args)
+		c.createLobby(packet.Payload)
 	case brp.ReqJoinLobby:
-		c.joinLobby(args)
+		c.joinLobby(packet.Payload)
 	case brp.ReqLeaveLobby:
 		c.leaveLobby()
 	case brp.ReqSetReadiness:
-		c.setReadiness(args)
+		c.setReadiness(packet.Payload)
 	case brp.ReqStartMatch:
 		c.startMatch()
 	}
