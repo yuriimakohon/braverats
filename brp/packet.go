@@ -10,6 +10,11 @@ import (
 // Ending is used to separate packets in the stream.
 var Ending = []byte{0x00, 0xFF, 0xCC}
 
+const (
+	MaxPlayerNameLen = 24
+	MaxLobbyNameLen  = 24
+)
+
 type Packet struct {
 	Tag     TAG
 	Payload []byte

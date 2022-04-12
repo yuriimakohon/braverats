@@ -8,19 +8,32 @@ import (
 	"fyne.io/fyne/v2/dialog"
 )
 
-func (app *App) applicationErrDialog(msg string) {
-	dialog.NewInformation("Application error", msg, app.w).Show()
+func (gui *GUI) applicationErrDialog(msg string) {
+	gui.applicationInfoDialog("Application error", msg)
 }
 
-func (app *App) serverErrDialog(msg string) {
+func (gui *GUI) applicationInfoDialog(title, msg string) {
+	dialog.ShowInformation(title, msg, gui.w)
+}
+
+// applicationErrDialog displays an information dialog and show another dialog by GID.
+func (gui *GUI) applicationInfoPopup(title, msg string, gid GID) {
+	dial := dialog.NewInformation(title, msg, gui.w)
+	dial.SetOnClosed(func() {
+		gui.showDialog(gid)
+	})
+	dial.Show()
+}
+
+func (gui *GUI) serverErrDialog(msg string) {
 	log.Println(msg)
-	dialog.NewInformation("Server error", msg, app.w).Show()
+	dialog.NewInformation("Server error", msg, gui.w).Show()
 }
 
-func (app *App) processSendErr(tag brp.TAG, err error) {
+func (gui *GUI) processSendErr(tag brp.TAG, err error) {
 	if err != nil {
 		msg := fmt.Sprintf("Error sending %s TAG to server: %v\n", tag, err)
 		log.Printf(msg)
-		app.applicationErrDialog(msg)
+		gui.applicationErrDialog(msg)
 	}
 }
