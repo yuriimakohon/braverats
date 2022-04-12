@@ -2,6 +2,7 @@ package client
 
 import (
 	"braverats/brp"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -70,7 +71,7 @@ func (app *App) handleIncomingPackets() {
 			continue
 		}
 		switch packet.Tag {
-		case brp.RespErr, brp.RespOk:
+		case brp.RespOk, brp.RespErr, brp.RespInfo:
 			app.responses <- packet
 		default:
 			app.events <- packet
@@ -107,19 +108,23 @@ func (app *App) receiveResponse() (brp.Packet, error) {
 	}
 }
 
-func (app *App) receiveAndProcessResponse(tag brp.TAG, okMsg, errMsg string) {
+func (app *App) receiveAndProcessResponse(tag brp.TAG, title string) {
 	resp, err := app.receiveResponse()
 	if err != nil {
 		log.Printf("Error receiving %s request`s response: %v", tag, err)
 		return
 	}
 
+	// Capitalize first letter of response message
+	msg := string(append(bytes.ToUpper(resp.Payload[0:1]), resp.Payload[1:]...))
+
 	switch resp.Tag {
-	case brp.RespErr:
-		errMsg = fmt.Sprintf("%s :: %s : %s", tag, resp, errMsg)
-		app.gui.serverErrDialog(errMsg)
 	case brp.RespOk:
-		okMsg = fmt.Sprintf("%s :: %s : %s", tag, resp, okMsg)
-		log.Println(okMsg)
+		log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
+	case brp.RespErr:
+		app.gui.serverErrDialog(fmt.Sprintf("%s :: %s : %s", tag, resp.Tag, msg))
+	case brp.RespInfo:
+		log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
+		app.gui.applicationInfoDialog(title, msg)
 	}
 }

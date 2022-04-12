@@ -16,25 +16,19 @@ import (
 func (app *App) CreateLobby(name string) {
 	_, err := app.conn.Write(brp.NewReqCreateLobby(name))
 	app.gui.processSendErr(brp.ReqCreateLobby, err)
-	app.receiveAndProcessResponse(brp.ReqCreateLobby,
-		fmt.Sprintf("Lobby %q successfully created", name),
-		fmt.Sprintf("Failed to create lobby %q", name))
+	app.receiveAndProcessResponse(brp.ReqCreateLobby, "Lobby")
 }
 
 func (app *App) JoinLobby(name string) {
 	_, err := app.conn.Write(brp.NewReqJoinLobby(name))
 	app.gui.processSendErr(brp.ReqJoinLobby, err)
-	app.receiveAndProcessResponse(brp.ReqJoinLobby,
-		fmt.Sprintf("Successfully joined to %q lobby", name),
-		fmt.Sprintf("Failed to join %q lobby", name))
+	app.receiveAndProcessResponse(brp.ReqJoinLobby, "Lobby")
 }
 
 func (app *App) LeaveLobby() {
 	_, err := app.conn.Write(brp.NewReqLeaveLobby())
 	app.gui.processSendErr(brp.ReqLeaveLobby, err)
-	app.receiveAndProcessResponse(brp.ReqLeaveLobby,
-		"Successfully left lobby",
-		"Failed to leave lobby")
+	app.receiveAndProcessResponse(brp.ReqLeaveLobby, "Lobby")
 }
 
 func (app *App) JoinedLobby(name string) {
@@ -52,7 +46,7 @@ func (app App) LobbyClosed() {
 func (app *App) PlayerReadiness(ready string) {
 	r, err := strconv.ParseBool(ready)
 	if err != nil {
-		log.Println("Failed to parse readiness: ", err)
+		app.gui.applicationErrDialog("failed to parse readiness: " + err.Error())
 		return
 	}
 

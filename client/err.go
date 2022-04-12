@@ -9,6 +9,7 @@ import (
 )
 
 func (gui *GUI) applicationErrDialog(msg string) {
+	log.Println("Application error: ", msg)
 	gui.applicationInfoDialog("Application error", msg)
 }
 
@@ -26,14 +27,13 @@ func (gui *GUI) applicationInfoPopup(title, msg string, gid GID) {
 }
 
 func (gui *GUI) serverErrDialog(msg string) {
-	log.Println(msg)
+	log.Println("Server error: ", msg)
 	dialog.NewInformation("Server error", msg, gui.w).Show()
 }
 
 func (gui *GUI) processSendErr(tag brp.TAG, err error) {
 	if err != nil {
-		msg := fmt.Sprintf("Error sending %s TAG to server: %v\n", tag, err)
-		log.Printf(msg)
+		msg := fmt.Sprintf("error sending %s TAG to server: %v\n", tag, err)
 		gui.applicationErrDialog(msg)
 	}
 }

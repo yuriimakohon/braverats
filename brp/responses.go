@@ -1,7 +1,9 @@
 package brp
 
-func NewRespOk() []byte {
-	return append([]byte(RespOk), Ending...)
+func NewRespOk(message string) []byte {
+	resp := append([]byte(RespOk), ' ')
+	resp = append(resp, []byte(message)...)
+	return append(resp, Ending...)
 }
 
 func NewRespErr(err error) []byte {

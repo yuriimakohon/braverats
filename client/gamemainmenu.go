@@ -3,7 +3,6 @@ package client
 import (
 	"braverats/brp"
 	"errors"
-	"fmt"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -14,9 +13,7 @@ import (
 func (app *App) SaveName(name string) {
 	_, err := app.conn.Write(brp.NewReqSetName(name))
 	app.gui.processSendErr(brp.ReqSetName, err)
-	app.receiveAndProcessResponse(brp.ReqSetName,
-		fmt.Sprintf("Name %q sucessfuly set", name),
-		fmt.Sprintf("Failed to set name %q", name))
+	app.receiveAndProcessResponse(brp.ReqSetName, "Nickname")
 }
 
 func (app *App) initGameMainMenu() {

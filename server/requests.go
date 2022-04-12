@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 )
@@ -13,8 +14,7 @@ func (c *client) setName(args []byte) {
 	}
 
 	c.name = string(args)
-	log.Printf("client %s set name to %s\n", c.id, c.name)
-	c.ok()
+	c.ok(fmt.Sprintf("name %q set", c.name))
 }
 
 func (c *client) createLobby(args []byte) {
@@ -29,7 +29,7 @@ func (c *client) createLobby(args []byte) {
 	}
 
 	if _, ok := c.server.lobbies[string(args)]; ok {
-		c.err(errors.New("lobby with such name already exists"))
+		c.info(fmt.Sprintf("lobby with name %q already exists", string(args)))
 		return
 	}
 
@@ -40,8 +40,7 @@ func (c *client) createLobby(args []byte) {
 	c.lobbyOwner = true
 	c.server.lobbies[string(args)] = c.lobby
 
-	log.Printf("client %s created lobby %q\n", c.id, c.lobby.name)
-	c.ok()
+	c.ok(fmt.Sprintf("lobby %q created", c.lobby.name))
 }
 
 func (c *client) joinLobby(args []byte) {
@@ -57,7 +56,7 @@ func (c *client) joinLobby(args []byte) {
 
 	lobby, ok := c.server.lobbies[string(args)]
 	if !ok {
-		c.err(errors.New("lobby with such name doesn't exists"))
+		c.info(fmt.Sprintf("lobby with name %q doesn't exists", string(args)))
 		return
 	}
 
@@ -66,7 +65,7 @@ func (c *client) joinLobby(args []byte) {
 	log.Printf("client %s joined lobby %q\n", c.id, lobby.name)
 
 	c.lobby.firstPlayer.joinedLobby(c.name)
-	c.ok()
+	c.ok(fmt.Sprintf("joined to %q lobby", lobby.name))
 }
 
 func (c *client) leaveLobby() {
@@ -90,9 +89,7 @@ func (c *client) leaveLobby() {
 	}
 
 	lobby.removePlayer(c.id)
-
-	log.Printf("client %s left lobby %s\n", c.id, lobby.name)
-	c.ok()
+	c.ok(fmt.Sprintf("left %q lobby", lobby.name))
 }
 
 func (c *client) setReadiness(args []byte) {
@@ -122,10 +119,9 @@ func (c *client) setReadiness(args []byte) {
 		if anotherPlayer != nil {
 			anotherPlayer.playerReadiness(ready)
 		}
-		log.Printf("client %s set readiness to %t\n", c.id, ready)
 	}
 
-	currentPlayer.ok()
+	currentPlayer.ok(fmt.Sprintf("readiness set to %t", ready))
 }
 
 func (c *client) startMatch() {
