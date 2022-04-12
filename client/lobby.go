@@ -50,7 +50,7 @@ func (app App) LobbyClosed() {
 func (app *App) PlayerReadiness(ready string) {
 	r, err := strconv.ParseBool(ready)
 	if err != nil {
-		log.Println("Failed to parse readiness:", err)
+		log.Println("Failed to parse readiness: ", err)
 		return
 	}
 

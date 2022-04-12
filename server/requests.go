@@ -40,7 +40,7 @@ func (c *client) createLobby(args []byte) {
 	c.lobbyOwner = true
 	c.server.lobbies[string(args)] = c.lobby
 
-	log.Printf("client %s created lobby %s\n", c.id, c.lobby.name)
+	log.Printf("client %s created lobby %q\n", c.id, c.lobby.name)
 	c.ok()
 }
 
@@ -63,7 +63,7 @@ func (c *client) joinLobby(args []byte) {
 
 	c.lobby = lobby
 	c.lobby.secondPlayer = c
-	log.Printf("client %s joined lobby %s\n", c.id, lobby.name)
+	log.Printf("client %s joined lobby %q\n", c.id, lobby.name)
 
 	c.lobby.firstPlayer.joinedLobby(c.name)
 	c.ok()
@@ -80,7 +80,6 @@ func (c *client) leaveLobby() {
 	if c.lobbyOwner {
 		delete(c.server.lobbies, lobby.name)
 		c.lobbyOwner = false
-		delete(c.server.lobbies, c.lobby.name)
 
 		if lobby.secondPlayer != nil {
 			lobby.secondPlayer.lobbyClosed()

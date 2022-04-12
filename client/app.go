@@ -4,6 +4,7 @@ import (
 	"braverats/brp"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -29,7 +30,7 @@ func NewApp(addr string) *App {
 	if err != nil {
 		log.Fatalf("Server didn't start: %v", err)
 	}
-	log.Println("Connected to server", conn.RemoteAddr())
+	log.Println("Connected to server ", conn.RemoteAddr())
 
 	return &App{
 		conn:      conn,
@@ -57,6 +58,10 @@ func (app *App) handleIncomingPackets() {
 	go app.handleEvents()
 	for {
 		packet, err := brp.ReadPacket(app.conn)
+		if err == io.EOF {
+			log.Println("lost connection with server")
+			break
+		}
 		if err != nil {
 			log.Println(err)
 			continue
@@ -68,6 +73,7 @@ func (app *App) handleIncomingPackets() {
 			app.events <- packet
 		}
 	}
+	app.a.Quit()
 }
 
 func (app *App) handleEvents() {
