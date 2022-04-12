@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
-	remoteAddr := flag.String("addr", "localhost", "")
+	remoteAddr := flag.String("addr", "localhost:3000", "")
 	flag.Parse()
 
-	client.NewApp(*remoteAddr + ":6077").Start()
+	client.NewApp(*remoteAddr).Start()
 }

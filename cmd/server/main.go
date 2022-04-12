@@ -1,7 +1,11 @@
 package main
 
-import "braverats/server"
+import (
+	"braverats/server"
+	"flag"
+)
 
 func main() {
-	server.NewServer().Start("6077")
+	port := flag.String("port", "3000", "port to listen on")
+	server.NewServer().Start(*port)
 }
