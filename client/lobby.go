@@ -80,67 +80,46 @@ func (app *App) MatchStarted() {
 	app.gui.sendNotification("Match", "implement MatchStarted")
 }
 
-func (app *App) initLobby() {
-	lobbyNameValidator := func(s string) error {
+type LobbyCreatorDialog struct {
+	dialog.Dialog
+}
+
+func newLobbyCreatorDialog(title, confirm string, callback func(string), parent fyne.Window) *LobbyCreatorDialog {
+	lobbyNameString := binding.NewString()
+	lobbyNameEntry := widget.NewEntryWithData(lobbyNameString)
+	lobbyNameEntry.SetPlaceHolder("Lobby name")
+	lobbyNameEntry.Validator = func(s string) error {
 		if len(s) == 0 || len(s) > brp.MaxLobbyNameLen {
 			return errors.New("")
 		}
 		return nil
 	}
-	dialogSize := fyne.NewSize(300, 100)
+	lobbyNameFormItem := widget.NewFormItem("", lobbyNameEntry)
+	dial := &LobbyCreatorDialog{
+		Dialog: dialog.NewForm(title, confirm, "Cancel", []*widget.FormItem{lobbyNameFormItem},
+			func(confirm bool) {
+				if !confirm {
+					return
+				}
+				name, err := lobbyNameString.Get()
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				callback(name)
+			}, parent),
+	}
+	dial.Resize(fyne.NewSize(300, 100))
+	return dial
+}
 
-	lobbyCreateNameString := binding.NewString()
-	lobbyCreateNameEntry := widget.NewEntryWithData(lobbyCreateNameString)
-	lobbyCreateNameEntry.Validator = lobbyNameValidator
-	lobbyNameFormItem := widget.NewFormItem("Lobby name", lobbyCreateNameEntry)
-	dialogCreateLobby := dialog.NewForm(
-		"Create lobby",
-		"Create",
-		"Cancel",
-		[]*widget.FormItem{lobbyNameFormItem},
-		func(confirm bool) {
-			if !confirm {
-				return
-			}
-			name, err := lobbyCreateNameString.Get()
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			app.CreateLobby(name)
-		},
-		app.gui.w,
-	)
-	dialogCreateLobby.Resize(dialogSize)
+func (app *App) initLobby() {
+	dialogCreateLobby := newLobbyCreatorDialog("Create lobby", "Create",
+		func(name string) { app.CreateLobby(name) }, app.gui.w)
 	app.gui.dialogs[GIDDialCreateLobby] = dialogCreateLobby
 
-	lobbyJoinNameString := binding.NewString()
-	lobbyJoinNameEntry := widget.NewEntryWithData(lobbyJoinNameString)
-	lobbyJoinNameEntry.Validator = lobbyNameValidator
-	lobbyJoinFormItem := widget.NewFormItem("Lobby name", lobbyJoinNameEntry)
-	dialogJoinLobby := dialog.NewForm(
-		"Join lobby",
-		"Join",
-		"Cancel",
-		[]*widget.FormItem{lobbyJoinFormItem},
-		func(confirm bool) {
-			if !confirm {
-				return
-			}
-			name, err := lobbyJoinNameString.Get()
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			if len(name) <= 0 {
-				app.gui.applicationInfoDialog("Lobby", "Lobby name cannot be empty")
-				return
-			}
-			app.JoinLobby(name)
-		},
-		app.gui.w,
-	)
-	dialogJoinLobby.Resize(dialogSize)
+	dialogJoinLobby := newLobbyCreatorDialog("Join lobby", "Join",
+		func(name string) { app.JoinLobby(name) }, app.gui.w)
 	app.gui.dialogs[GIDDialJoinLobby] = dialogJoinLobby
 
 	ownReadinessCheck := widget.NewCheck("Ready", func(ready bool) {
