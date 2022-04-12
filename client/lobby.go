@@ -43,6 +43,10 @@ func (app *App) LeftLobby(name string) {
 	app.sendNotification("Lobby", fmt.Sprintf("%s left the lobby", name))
 }
 
+func (app App) LobbyClosed() {
+	app.sendNotification("Lobby", "Owner left lobby")
+}
+
 func (app *App) PlayerReadiness(ready string) {
 	r, err := strconv.ParseBool(ready)
 	if err != nil {

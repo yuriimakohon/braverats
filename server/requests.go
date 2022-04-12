@@ -75,20 +75,24 @@ func (c *client) leaveLobby() {
 		return
 	}
 
+	lobby := c.lobby
+
 	if c.lobbyOwner {
+		delete(c.server.lobbies, lobby.name)
 		c.lobbyOwner = false
 		delete(c.server.lobbies, c.lobby.name)
 
-		if c.lobby.secondPlayer != nil {
-			c.lobby.secondPlayer.lobby = nil
-			c.lobby.secondPlayer.leftLobby(c.name)
+		if lobby.secondPlayer != nil {
+			lobby.secondPlayer.lobbyClosed()
+			lobby.removePlayer(lobby.secondPlayer.id)
 		}
 	} else {
-		c.lobby.firstPlayer.leftLobby(c.name)
+		lobby.firstPlayer.leftLobby(c.name)
 	}
 
-	c.lobby = nil
-	log.Printf("client %s left lobby %s\n", c.id, c.lobby.name)
+	lobby.removePlayer(c.id)
+
+	log.Printf("client %s left lobby %s\n", c.id, lobby.name)
 	c.ok()
 }
 

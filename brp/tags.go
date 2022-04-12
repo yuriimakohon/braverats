@@ -23,6 +23,7 @@ const (
 const (
 	EventJoinedLobby     TAG = "JOINED_LOBBY"
 	EventLeftLobby       TAG = "LEFT_LOBBY"
+	EventLobbyClosed     TAG = "LOBBY_CLOSED"
 	EventPlayerReadiness TAG = "PLAYER_READINESS"
 	EventMatchStarted    TAG = "MATCH_STARTED"
 )
@@ -41,6 +42,7 @@ var tags = map[TAG]struct{}{
 
 	EventJoinedLobby:     {},
 	EventLeftLobby:       {},
+	EventLobbyClosed:     {},
 	EventPlayerReadiness: {},
 	EventMatchStarted:    {},
 }

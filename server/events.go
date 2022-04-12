@@ -12,6 +12,11 @@ func (c *client) leftLobby(name string) {
 	c.handleWriteErr(brp.EventLeftLobby, err)
 }
 
+func (c *client) lobbyClosed() {
+	_, err := c.conn.Write(brp.NewEventLobbyClosed())
+	c.handleWriteErr(brp.EventLobbyClosed, err)
+}
+
 func (c *client) playerReadiness(ready bool) {
 	_, err := c.conn.Write(brp.NewEventPlayerReadiness(ready))
 	c.handleWriteErr(brp.EventPlayerReadiness, err)

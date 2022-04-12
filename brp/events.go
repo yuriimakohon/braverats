@@ -14,6 +14,10 @@ func NewEventLeftLobby(name string) []byte {
 	return append(resp, Ending...)
 }
 
+func NewEventLobbyClosed() []byte {
+	return append([]byte(EventLobbyClosed), Ending...)
+}
+
 func NewEventPlayerReadiness(ready bool) []byte {
 	resp := append([]byte(EventPlayerReadiness), ' ')
 	resp = append(resp, []byte(strconv.FormatBool(ready))...)

@@ -58,14 +58,21 @@ func (s *Server) removeClient(id uuid.UUID) {
 		return
 	}
 
-	if c.lobby != nil {
+	lobby := c.lobby
+
+	if lobby != nil {
 		if c.lobbyOwner {
-			delete(s.lobbies, c.lobby.name)
-			// TODO: implement c.secondPlayer.lobbyDeleted()
+			delete(c.server.lobbies, lobby.name)
+
+			if lobby.secondPlayer != nil {
+				lobby.secondPlayer.lobbyClosed()
+				lobby.removePlayer(lobby.secondPlayer.id)
+			}
 		} else {
-			c.lobby.secondPlayer = nil
-			c.lobby.firstPlayer.leftLobby(c.name)
+			lobby.firstPlayer.leftLobby(c.name)
 		}
+
+		lobby.removePlayer(c.id)
 	}
 	c.conn.Close()
 	delete(s.clients, id)

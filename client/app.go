@@ -79,6 +79,8 @@ func (app *App) handleEvents() {
 			app.JoinedLobby(string(packet.Payload))
 		case brp.EventLeftLobby:
 			app.LeftLobby(string(packet.Payload))
+		case brp.EventLobbyClosed:
+			app.LobbyClosed()
 		case brp.EventPlayerReadiness:
 			app.PlayerReadiness(string(packet.Payload))
 		case brp.EventMatchStarted:
