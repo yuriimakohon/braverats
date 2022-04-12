@@ -10,7 +10,7 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-func (app *App) SaveName(name string) {
+func (app *App) SetNickname(name string) {
 	_, err := app.conn.Write(brp.NewReqSetName(name))
 	app.gui.processSendErr(brp.ReqSetName, err)
 	app.receiveAndProcessResponse(brp.ReqSetName, "Nickname")
@@ -43,7 +43,7 @@ func (app *App) initGameMainMenu() {
 
 	nicknameEntry := widget.NewEntry()
 	saveNicknameBtn := widget.NewButton("Save", func() {
-		app.SaveName(nicknameEntry.Text)
+		app.SetNickname(nicknameEntry.Text)
 	})
 	nicknameEntry.Validator = func(s string) error {
 		if len(s) == 0 || len(s) > brp.MaxPlayerNameLen {
