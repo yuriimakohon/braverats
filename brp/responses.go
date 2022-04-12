@@ -9,3 +9,9 @@ func NewRespErr(err error) []byte {
 	resp = append(resp, []byte(err.Error())...)
 	return append(resp, Ending...)
 }
+
+func NewRespInfo(info string) []byte {
+	resp := append([]byte(RespInfo), ' ')
+	resp = append(resp, []byte(info)...)
+	return append(resp, Ending...)
+}

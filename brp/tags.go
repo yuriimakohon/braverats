@@ -15,8 +15,9 @@ const (
 
 // Server side response BRP TAGs.
 const (
-	RespOk  TAG = "OK"
-	RespErr TAG = "ERR"
+	RespOk   TAG = "OK"
+	RespErr  TAG = "ERR"
+	RespInfo TAG = "INFO"
 )
 
 // Server side event BRP TAGs.
@@ -37,8 +38,9 @@ var tags = map[TAG]struct{}{
 	ReqSetReadiness: {},
 	ReqStartMatch:   {},
 
-	RespOk:  {},
-	RespErr: {},
+	RespOk:   {},
+	RespErr:  {},
+	RespInfo: {},
 
 	EventJoinedLobby:     {},
 	EventLeftLobby:       {},
