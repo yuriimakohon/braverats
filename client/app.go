@@ -29,6 +29,7 @@ func NewApp(addr string) *App {
 	if err != nil {
 		log.Fatalf("Server didn't start: %v", err)
 	}
+	log.Println("Connected to server", conn.RemoteAddr())
 
 	return &App{
 		conn:      conn,

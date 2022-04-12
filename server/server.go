@@ -32,7 +32,7 @@ func (s *Server) Start(port string) {
 
 	s.ln = ln
 
-	log.Println("Server started on port " + port)
+	log.Println("Server started on port" + port)
 
 	for {
 		conn, err := s.ln.Accept()
@@ -47,7 +47,7 @@ func (s *Server) Start(port string) {
 func (s *Server) addClient(conn net.Conn) *client {
 	c := newClient(conn, s)
 	s.clients[c.id] = c
-	log.Println("new client added with id ", c.id.String())
+	log.Println("new client added with id", c.id.String())
 	return c
 }
 
@@ -69,7 +69,7 @@ func (s *Server) removeClient(id uuid.UUID) {
 	}
 	c.conn.Close()
 	delete(s.clients, id)
-	log.Println("client " + c.conn.RemoteAddr().String() + " " + c.id.String() + "  disconnected")
+	log.Println("client", c.conn.RemoteAddr().String(), c.id.String(), "disconnected")
 }
 
 func (s *Server) handleConnection(conn net.Conn) {
