@@ -5,28 +5,29 @@ type TAG string
 
 // Client side request BRP TAGs.
 const (
-	ReqSetName      TAG = "SET_NAME"
-	ReqCreateLobby  TAG = "CREATE_LOBBY"
-	ReqJoinLobby    TAG = "JOIN_LOBBY"
-	ReqLeaveLobby   TAG = "LEAVE_LOBBY"
-	ReqSetReadiness TAG = "SET_READINESS"
-	ReqStartMatch   TAG = "START_MATCH"
+	ReqSetName      TAG = "REQ_SET_NAME"
+	ReqCreateLobby  TAG = "REQ_CREATE_LOBBY"
+	ReqJoinLobby    TAG = "REQ_JOIN_LOBBY"
+	ReqLeaveLobby   TAG = "REQ_LEAVE_LOBBY"
+	ReqSetReadiness TAG = "REQ_SET_READINESS"
+	ReqStartMatch   TAG = "REQ_START_MATCH"
 )
 
 // Server side response BRP TAGs.
 const (
-	RespOk   TAG = "OK"
-	RespErr  TAG = "ERR"
-	RespInfo TAG = "INFO"
+	RespOk    TAG = "RESP_OK"
+	RespErr   TAG = "RESP_ERR"
+	RespInfo  TAG = "RESP_INFO"
+	RespLobby TAG = "RESP_LOBBY"
 )
 
 // Server side event BRP TAGs.
 const (
-	EventJoinedLobby     TAG = "JOINED_LOBBY"
-	EventLeftLobby       TAG = "LEFT_LOBBY"
-	EventLobbyClosed     TAG = "LOBBY_CLOSED"
-	EventPlayerReadiness TAG = "PLAYER_READINESS"
-	EventMatchStarted    TAG = "MATCH_STARTED"
+	EventJoinedLobby     TAG = "EVENT_JOINED_LOBBY"
+	EventLeftLobby       TAG = "EVENT_LEFT_LOBBY"
+	EventLobbyClosed     TAG = "EVENT_LOBBY_CLOSED"
+	EventPlayerReadiness TAG = "EVENT_PLAYER_READINESS"
+	EventMatchStarted    TAG = "EVENT_MATCH_STARTED"
 )
 
 // tags is a set of all BRP tags
@@ -38,9 +39,10 @@ var tags = map[TAG]struct{}{
 	ReqSetReadiness: {},
 	ReqStartMatch:   {},
 
-	RespOk:   {},
-	RespErr:  {},
-	RespInfo: {},
+	RespOk:    {},
+	RespErr:   {},
+	RespInfo:  {},
+	RespLobby: {},
 
 	EventJoinedLobby:     {},
 	EventLeftLobby:       {},

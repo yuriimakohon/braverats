@@ -48,18 +48,29 @@ func (gui *GUI) AddDialog(gid GID, d dialog.Dialog) {
 	gui.dialogs[gid] = d
 }
 
-func (gui *GUI) ShowDialog(gid GID) {
+func (gui *GUI) checkDialog(gid GID) (bool, dialog.Dialog) {
 	dial, ok := gui.dialogs[gid]
 	if !ok {
 		log.Println("dialog not found: ", gid)
-		return
+		return false, nil
 	}
 	if dial == nil {
 		log.Println("dialog is nil: ", gid)
-		return
+		return false, nil
 	}
+	return true, dial
+}
 
-	dial.Show()
+func (gui *GUI) ShowDialog(gid GID) {
+	if ok, dial := gui.checkDialog(gid); ok {
+		dial.Show()
+	}
+}
+
+func (gui *GUI) HideDialog(gid GID) {
+	if ok, dial := gui.checkDialog(gid); ok {
+		dial.Hide()
+	}
 }
 
 func (gui *GUI) SendNotification(title, message string) {

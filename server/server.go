@@ -91,7 +91,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 		}
 		if err != nil {
 			log.Printf("Error read packet from %s: %s\n", conn.RemoteAddr().String(), err)
-			client.err(err)
+			client.respErr(err)
 			continue
 		}
 		s.handleReq(packet, client)

@@ -3,6 +3,7 @@ package client
 import (
 	"braverats/brp"
 	"braverats/client/gui"
+	"bytes"
 	"fmt"
 	"strconv"
 )
@@ -20,9 +21,8 @@ func (app *App) CreateLobby(name string) {
 func (app *App) JoinLobby(name string) {
 	_, err := app.conn.Write(brp.NewReqJoinLobby(name))
 	app.gui.SendErrDialog(brp.ReqJoinLobby, err)
-	// TODO: receive info about lobby
 	if app.receiveAndProcessResponse(brp.ReqJoinLobby, "Lobby") {
-		err = app.lobby.gui.Reset(name)
+		err = app.lobby.gui.Name.Set(name)
 		app.gui.ApplicationErrDialog(err)
 		app.gui.ShowDialog(gui.GIDDialLobby)
 	}
@@ -57,6 +57,7 @@ func (app *App) LeftLobby(name string) {
 
 func (app *App) LobbyClosed() {
 	app.gui.SendNotification("Lobby", "Owner left lobby")
+	app.gui.HideDialog(gui.GIDDialLobby)
 	app.gui.ApplicationInfoDialog("Lobby closed", "The lobby owner has left the lobby")
 }
 
@@ -82,6 +83,20 @@ func newLobby(parentApp *App) *lobby {
 		app: parentApp,
 		gui: gui.NewLobby(),
 	}
+}
+
+func (l *lobby) RespLobby(payload []byte) {
+	args := bytes.Split(payload, []byte(" "))
+	ready, err := strconv.ParseBool(string(args[0]))
+	l.app.gui.ApplicationErrDialog(err)
+	name := string(bytes.Join(args[1:], []byte(" ")))
+
+	err = l.gui.Reset("")
+	l.app.gui.ApplicationErrDialog(err)
+	err = l.gui.SecondPlayer.Ready.Set(ready)
+	l.app.gui.ApplicationErrDialog(err)
+	err = l.gui.SecondPlayer.Name.Set(name)
+	l.app.gui.ApplicationErrDialog(err)
 }
 
 func (app *App) initLobby() {

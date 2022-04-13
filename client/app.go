@@ -62,11 +62,13 @@ func (app *App) handleIncomingPackets() {
 			log.Println(err)
 			continue
 		}
-		switch packet.Tag {
-		case brp.RespOk, brp.RespErr, brp.RespInfo:
+		switch packet.Type {
+		case brp.TypeResp:
 			app.responses <- packet
-		default:
+		case brp.TypeEvent:
 			app.events <- packet
+		default:
+			log.Printf("Client can't handle packet %s with %s type", packet, packet.Type)
 		}
 	}
 	app.gui.A.Quit()
@@ -111,8 +113,6 @@ func (app *App) receiveAndProcessResponse(tag brp.TAG, title string) bool {
 	msg := string(append(bytes.ToUpper(resp.Payload[0:1]), resp.Payload[1:]...))
 
 	switch resp.Tag {
-	case brp.RespOk:
-		log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
 	case brp.RespErr:
 		app.gui.ServerErrDialog(fmt.Sprintf("%s :: %s : %s", tag, resp.Tag, msg))
 		return false
@@ -120,6 +120,9 @@ func (app *App) receiveAndProcessResponse(tag brp.TAG, title string) bool {
 		log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
 		app.gui.ApplicationInfoDialog(title, msg)
 		return false
+	case brp.RespLobby:
+		app.lobby.RespLobby(resp.Payload)
 	}
+	log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
 	return true
 }
