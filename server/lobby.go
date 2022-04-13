@@ -19,7 +19,7 @@ func (l *lobby) removePlayer(id uuid.UUID) {
 		l.firstPlayer = nil
 	} else if l.secondPlayer.id == id {
 		l.secondPlayer.lobby = nil
-		l.firstPlayer.ready = false
+		l.secondPlayer.ready = false
 		l.secondPlayer = nil
 	}
 }
