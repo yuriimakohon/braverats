@@ -2,6 +2,7 @@ package client
 
 import (
 	"braverats/brp"
+	"braverats/client/gui"
 	"bytes"
 	"errors"
 	"fmt"
@@ -9,51 +10,42 @@ import (
 	"log"
 	"net"
 	"time"
-
-	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/dialog"
 )
 
 type App struct {
 	conn      net.Conn        // connection to game server
 	responses chan brp.Packet // channel for responses from server
 	events    chan brp.Packet // channel for events from server
-	gui       GUI
+	gui       gui.GUI
+	lobby     *lobby
 }
 
 // NewApp creates a new Brave Rats game client application. addr parameter is game server address.
 func NewApp(addr string) *App {
-	a := app.New()
-	w := a.NewWindow(gameClientTitle)
-
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		log.Fatalf("Server didn't start: %v", err)
 	}
 	log.Println("Connected to server ", conn.RemoteAddr())
 
-	return &App{
+	app := &App{
 		conn:      conn,
 		responses: make(chan brp.Packet),
 		events:    make(chan brp.Packet),
-		gui: GUI{
-			a:       a,
-			w:       w,
-			dialogs: make(map[GID]dialog.Dialog),
-		},
+		gui:       gui.NewGUI(),
 	}
+	app.lobby = newLobby(app)
+
+	return app
 }
 
 func (app *App) Start() {
 	app.init()
 	go app.handleIncomingPackets()
-	app.gui.w.ShowAndRun()
+	app.gui.W.ShowAndRun()
 }
 
 func (app *App) init() {
-	app.gui.w.Resize(fyne.NewSize(gameWindowWidth, gameWindowHeight))
-	app.gui.w.SetMaster()
 
 	app.initGameMainMenu()
 }
@@ -77,7 +69,7 @@ func (app *App) handleIncomingPackets() {
 			app.events <- packet
 		}
 	}
-	app.gui.a.Quit()
+	app.gui.A.Quit()
 }
 
 func (app *App) handleEvents() {
@@ -122,11 +114,11 @@ func (app *App) receiveAndProcessResponse(tag brp.TAG, title string) bool {
 	case brp.RespOk:
 		log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
 	case brp.RespErr:
-		app.gui.serverErrDialog(fmt.Sprintf("%s :: %s : %s", tag, resp.Tag, msg))
+		app.gui.ServerErrDialog(fmt.Sprintf("%s :: %s : %s", tag, resp.Tag, msg))
 		return false
 	case brp.RespInfo:
 		log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
-		app.gui.applicationInfoDialog(title, msg)
+		app.gui.ApplicationInfoDialog(title, msg)
 		return false
 	}
 	return true

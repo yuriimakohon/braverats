@@ -2,6 +2,7 @@ package client
 
 import (
 	"braverats/brp"
+	"braverats/client/gui"
 	"errors"
 
 	"fyne.io/fyne/v2"
@@ -12,7 +13,7 @@ import (
 
 func (app *App) SetNickname(name string) {
 	_, err := app.conn.Write(brp.NewReqSetName(name))
-	app.gui.processSendErr(brp.ReqSetName, err)
+	app.gui.ProcessSendErr(brp.ReqSetName, err)
 	app.receiveAndProcessResponse(brp.ReqSetName, "Nickname")
 }
 
@@ -23,21 +24,21 @@ func (app *App) initGameMainMenu() {
 		"Quit", "Are you sure you want to quit the game?",
 		func(ok bool) {
 			if ok {
-				app.gui.a.Quit()
+				app.gui.A.Quit()
 			}
 		},
-		app.gui.w,
+		app.gui.W,
 	)
-	app.gui.dialogs[GIDDialQuitConfirm] = dialogQuitConfirm
+	app.gui.AddDialog(gui.GIDDialQuitConfirm, dialogQuitConfirm)
 
 	createLobbyBtn := widget.NewButton("Create Lobby", func() {
-		app.gui.showDialog(GIDDialCreateLobby)
+		app.gui.ShowDialog(gui.GIDDialCreateLobby)
 	})
 	joinLobbyBtn := widget.NewButton("Join Lobby", func() {
-		app.gui.showDialog(GIDDialJoinLobby)
+		app.gui.ShowDialog(gui.GIDDialJoinLobby)
 	})
 	gameQuitBtn := widget.NewButton("Quit", func() {
-		app.gui.showDialog(GIDDialQuitConfirm)
+		app.gui.ShowDialog(gui.GIDDialQuitConfirm)
 	})
 	btnMinSize := fyne.NewSize(200, 50)
 
@@ -57,16 +58,16 @@ func (app *App) initGameMainMenu() {
 	}
 	nicknameEntry.SetPlaceHolder("Enter your nickname")
 	nicknameEntry.Resize(fyne.NewSize(200, nicknameEntry.MinSize().Height))
-	nicknameEntry.Move(fyne.NewPos(gameWindowWidth/2-btnMinSize.Width/2, gameWindowHeight/3-btnMinSize.Height/2))
+	nicknameEntry.Move(fyne.NewPos(gui.GameWindowWidth/2-btnMinSize.Width/2, gui.GameWindowHeight/3-btnMinSize.Height/2))
 	saveNicknameBtn.Resize(fyne.NewSize(120, 35))
-	saveNicknameBtn.Move(fyne.NewPos(gameWindowWidth/2-120/2, nicknameEntry.Position().Y+nicknameEntry.Size().Height+10))
+	saveNicknameBtn.Move(fyne.NewPos(gui.GameWindowWidth/2-120/2, nicknameEntry.Position().Y+nicknameEntry.Size().Height+10))
 
 	createLobbyBtn.Resize(btnMinSize)
-	createLobbyBtn.Move(fyne.NewPos(gameWindowWidth/2-btnMinSize.Width/2, gameWindowHeight/2-btnMinSize.Height/2))
+	createLobbyBtn.Move(fyne.NewPos(gui.GameWindowWidth/2-btnMinSize.Width/2, gui.GameWindowHeight/2-btnMinSize.Height/2))
 	joinLobbyBtn.Resize(btnMinSize)
-	joinLobbyBtn.Move(fyne.NewPos(gameWindowWidth/2-btnMinSize.Width/2, gameWindowHeight/2-btnMinSize.Height/2+70))
+	joinLobbyBtn.Move(fyne.NewPos(gui.GameWindowWidth/2-btnMinSize.Width/2, gui.GameWindowHeight/2-btnMinSize.Height/2+70))
 	gameQuitBtn.Resize(btnMinSize)
-	gameQuitBtn.Move(fyne.NewPos(gameWindowWidth/2-btnMinSize.Width/2, gameWindowHeight/1.2-btnMinSize.Height/2))
+	gameQuitBtn.Move(fyne.NewPos(gui.GameWindowWidth/2-btnMinSize.Width/2, gui.GameWindowHeight/1.2-btnMinSize.Height/2))
 
 	mainGameMenuVBox := container.NewWithoutLayout()
 	mainGameMenuVBox.Add(nicknameEntry)
@@ -75,5 +76,5 @@ func (app *App) initGameMainMenu() {
 	mainGameMenuVBox.Add(joinLobbyBtn)
 	mainGameMenuVBox.Add(gameQuitBtn)
 
-	app.gui.w.SetContent(mainGameMenuVBox)
+	app.gui.W.SetContent(mainGameMenuVBox)
 }
