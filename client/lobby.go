@@ -5,73 +5,67 @@ import (
 	"braverats/client/gui"
 	"fmt"
 	"strconv"
-
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/widget"
 )
 
 func (app *App) CreateLobby(name string) {
 	_, err := app.conn.Write(brp.NewReqCreateLobby(name))
-	app.gui.ProcessSendErr(brp.ReqCreateLobby, err)
+	app.gui.SendErrDialog(brp.ReqCreateLobby, err)
 	if app.receiveAndProcessResponse(brp.ReqCreateLobby, "Lobby") {
+		err = app.lobby.gui.Reset(name)
+		app.gui.ApplicationErrDialog(err)
 		app.gui.ShowDialog(gui.GIDDialLobby)
 	}
 }
 
 func (app *App) JoinLobby(name string) {
 	_, err := app.conn.Write(brp.NewReqJoinLobby(name))
-	app.gui.ProcessSendErr(brp.ReqJoinLobby, err)
+	app.gui.SendErrDialog(brp.ReqJoinLobby, err)
+	// TODO: receive info about lobby
 	if app.receiveAndProcessResponse(brp.ReqJoinLobby, "Lobby") {
+		err = app.lobby.gui.Reset(name)
+		app.gui.ApplicationErrDialog(err)
 		app.gui.ShowDialog(gui.GIDDialLobby)
 	}
 }
 
 func (app *App) LeaveLobby() {
 	_, err := app.conn.Write(brp.NewReqLeaveLobby())
-	app.gui.ProcessSendErr(brp.ReqLeaveLobby, err)
+	app.gui.SendErrDialog(brp.ReqLeaveLobby, err)
 	app.receiveAndProcessResponse(brp.ReqLeaveLobby, "Lobby")
 }
 
 func (app *App) SetReadiness(ready bool) {
 	_, err := app.conn.Write(brp.NewReqSetReadiness(ready))
-	app.gui.ProcessSendErr(brp.ReqSetReadiness, err)
-	app.receiveAndProcessResponse(brp.ReqSetReadiness, "Lobby")
+	app.gui.SendErrDialog(brp.ReqSetReadiness, err)
+	if app.receiveAndProcessResponse(brp.ReqSetReadiness, "Lobby") {
+		err = app.lobby.gui.FirstPlayer.Ready.Set(ready)
+		app.gui.ApplicationErrDialog(err)
+	}
 }
 
 func (app *App) JoinedLobby(name string) {
 	app.gui.SendNotification("Lobby", fmt.Sprintf("%s joined the lobby", name))
+	err := app.lobby.gui.SecondPlayer.Name.Set(name)
+	app.gui.ApplicationErrDialog(err)
 }
 
 func (app *App) LeftLobby(name string) {
 	app.gui.SendNotification("Lobby", fmt.Sprintf("%s left the lobby", name))
+	err := app.lobby.gui.ResetSecondPlayer()
+	app.gui.ApplicationErrDialog(err)
 }
 
-func (app App) LobbyClosed() {
+func (app *App) LobbyClosed() {
 	app.gui.SendNotification("Lobby", "Owner left lobby")
 	app.gui.ApplicationInfoDialog("Lobby closed", "The lobby owner has left the lobby")
 }
 
-var anotherPlayerReady = binding.NewBool()
-
 func (app *App) PlayerReadiness(ready string) {
 	r, err := strconv.ParseBool(ready)
-	if err != nil {
-		app.gui.ApplicationErrDialog("failed to parse readiness: " + err.Error())
-		return
-	}
+	app.gui.ApplicationErrDialog(err)
 
-	err = anotherPlayerReady.Set(r)
-	if err != nil {
-		app.gui.ApplicationErrDialog("failed to set another player readiness: " + err.Error())
-		return
-	}
-	if r {
-		app.gui.SendNotification("Lobby", "Another player is ready")
-	} else {
-		app.gui.SendNotification("Lobby", "Another player is not ready")
-	}
+	err = app.lobby.gui.SecondPlayer.Ready.Set(r)
+	app.gui.ApplicationErrDialog(err)
 }
 
 func (app *App) MatchStarted() {
@@ -79,12 +73,15 @@ func (app *App) MatchStarted() {
 }
 
 type lobby struct {
-	app  *App // parent App
-	name string
+	app *App // parent App
+	gui *gui.Lobby
 }
 
 func newLobby(parentApp *App) *lobby {
-	return &lobby{app: parentApp}
+	return &lobby{
+		app: parentApp,
+		gui: gui.NewLobby(),
+	}
 }
 
 func (app *App) initLobby() {
@@ -96,22 +93,12 @@ func (app *App) initLobby() {
 		func(name string) { app.JoinLobby(name) }, app.gui.W)
 	app.gui.AddDialog(gui.GIDDialJoinLobby, dialogJoinLobby)
 
-	ownReadinessCheck := widget.NewCheck("Ready", func(ready bool) {
-		app.SetReadiness(ready)
-	})
-	anotherPlayerReadinessCheck := &widget.Check{
-		Text:    "Another player is ready",
-		Checked: false,
-		OnChanged: func(ready bool) {
-			app.PlayerReadiness(strconv.FormatBool(ready))
-		},
-	}
-	anotherPlayerReadinessCheck.Disable()
-	anotherPlayerReadinessCheck.Bind(anotherPlayerReady)
-	vbox := container.NewVBox(ownReadinessCheck, anotherPlayerReadinessCheck)
-	lobbyDialog := dialog.NewCustom("Lobby", "Leave", vbox, app.gui.W)
-	lobbyDialog.SetOnClosed(func() {
-		app.LeaveLobby()
-	})
-	app.gui.AddDialog(gui.GIDDialLobby, lobbyDialog)
+	dialogLobby := gui.NewLobbyDialog(
+		func(ready bool) { app.SetReadiness(ready) },
+		func() { app.LeaveLobby() },
+		*app.lobby.gui,
+		app.gui.W,
+	)
+
+	app.gui.AddDialog(gui.GIDDialLobby, dialogLobby)
 }

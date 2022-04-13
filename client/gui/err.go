@@ -8,9 +8,12 @@ import (
 	"fyne.io/fyne/v2/dialog"
 )
 
-func (gui *GUI) ApplicationErrDialog(msg string) {
-	log.Println("Application error: ", msg)
-	gui.ApplicationInfoDialog("Application error", msg)
+// ApplicationErrDialog logs and show application side error dialog if it's not nil.
+func (gui *GUI) ApplicationErrDialog(err error) {
+	if err != nil {
+		log.Println("Application error: ", err)
+		gui.ApplicationInfoDialog("Application error", err.Error())
+	}
 }
 
 func (gui *GUI) ApplicationInfoDialog(title string, msg string) {
@@ -26,14 +29,15 @@ func (gui *GUI) ApplicationInfoPopup(title, msg string, gid GID) {
 	dial.Show()
 }
 
+// ServerErrDialog logs and show message in server side error dialog .
 func (gui *GUI) ServerErrDialog(msg string) {
 	log.Println("Server error: ", msg)
 	dialog.NewInformation("Server error", msg, gui.W).Show()
 }
 
-func (gui *GUI) ProcessSendErr(tag brp.TAG, err error) {
+// SendErrDialog wraps error with send err message and call ApplicationErrDialog.
+func (gui *GUI) SendErrDialog(tag brp.TAG, err error) {
 	if err != nil {
-		msg := fmt.Sprintf("error sending %s TAG to server: %v\n", tag, err)
-		gui.ApplicationErrDialog(msg)
+		gui.ApplicationErrDialog(fmt.Errorf("error sending %s TAG to server: %v\n", tag, err))
 	}
 }

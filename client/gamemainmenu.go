@@ -13,7 +13,7 @@ import (
 
 func (app *App) SetNickname(name string) {
 	_, err := app.conn.Write(brp.NewReqSetName(name))
-	app.gui.ProcessSendErr(brp.ReqSetName, err)
+	app.gui.SendErrDialog(brp.ReqSetName, err)
 	app.receiveAndProcessResponse(brp.ReqSetName, "Nickname")
 }
 
