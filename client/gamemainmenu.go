@@ -14,7 +14,9 @@ import (
 func (app *App) SetNickname(name string) {
 	_, err := app.conn.Write(brp.NewReqSetName(name))
 	app.gui.SendErrDialog(brp.ReqSetName, err)
-	app.receiveAndProcessResponse(brp.ReqSetName, "Nickname")
+	if ok, _ := app.receiveAndProcessResponse(brp.ReqSetName, "Nickname"); ok {
+		app.gui.SendNotification("Nickname saved", name)
+	}
 }
 
 func (app *App) initGameMainMenu() {

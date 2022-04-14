@@ -11,19 +11,31 @@ import (
 func (app *App) CreateLobby(name string) {
 	_, err := app.conn.Write(brp.NewReqCreateLobby(name))
 	app.gui.SendErrDialog(brp.ReqCreateLobby, err)
-	if app.receiveAndProcessResponse(brp.ReqCreateLobby, "Lobby") {
-		err = app.lobby.gui.Reset(name)
+	if ok, _ := app.receiveAndProcessResponse(brp.ReqCreateLobby, "Lobby"); ok {
+		app.lobby.playerIn = true
+
+		err = app.lobby.gui.Reset(name, true)
 		app.gui.ApplicationErrDialog(err)
+
 		app.gui.ShowDialog(gui.GIDDialLobby)
 	}
 }
 
-func (app *App) JoinLobby(name string) {
-	_, err := app.conn.Write(brp.NewReqJoinLobby(name))
+func (app *App) JoinLobby(lobbyName string) {
+	_, err := app.conn.Write(brp.NewReqJoinLobby(lobbyName))
 	app.gui.SendErrDialog(brp.ReqJoinLobby, err)
-	if app.receiveAndProcessResponse(brp.ReqJoinLobby, "Lobby") {
-		err = app.lobby.gui.Name.Set(name)
+	if ok, resp := app.receiveAndProcessResponse(brp.ReqJoinLobby, "Lobby"); ok {
+		app.lobby.playerIn = true
+
+		err = app.lobby.gui.Reset(lobbyName, false)
 		app.gui.ApplicationErrDialog(err)
+
+		ready, opponentName := app.RespLobby(resp.Payload)
+		err = app.lobby.gui.SecondPlayer.Ready.Set(ready)
+		app.gui.ApplicationErrDialog(err)
+		err = app.lobby.gui.SecondPlayer.Name.Set(opponentName)
+		app.gui.ApplicationErrDialog(err)
+
 		app.gui.ShowDialog(gui.GIDDialLobby)
 	}
 }
@@ -31,13 +43,15 @@ func (app *App) JoinLobby(name string) {
 func (app *App) LeaveLobby() {
 	_, err := app.conn.Write(brp.NewReqLeaveLobby())
 	app.gui.SendErrDialog(brp.ReqLeaveLobby, err)
-	app.receiveAndProcessResponse(brp.ReqLeaveLobby, "Lobby")
+	if ok, _ := app.receiveAndProcessResponse(brp.ReqLeaveLobby, "Lobby"); ok {
+		app.lobby.playerIn = false
+	}
 }
 
 func (app *App) SetReadiness(ready bool) {
 	_, err := app.conn.Write(brp.NewReqSetReadiness(ready))
 	app.gui.SendErrDialog(brp.ReqSetReadiness, err)
-	if app.receiveAndProcessResponse(brp.ReqSetReadiness, "Lobby") {
+	if ok, _ := app.receiveAndProcessResponse(brp.ReqSetReadiness, "Lobby"); ok {
 		err = app.lobby.gui.FirstPlayer.Ready.Set(ready)
 		app.gui.ApplicationErrDialog(err)
 	}
@@ -51,12 +65,13 @@ func (app *App) JoinedLobby(name string) {
 
 func (app *App) LeftLobby(name string) {
 	app.gui.SendNotification("Lobby", fmt.Sprintf("%s left the lobby", name))
+
 	err := app.lobby.gui.ResetSecondPlayer()
 	app.gui.ApplicationErrDialog(err)
 }
 
 func (app *App) LobbyClosed() {
-	app.gui.SendNotification("Lobby", "Owner left lobby")
+	app.lobby.playerIn = false
 	app.gui.HideDialog(gui.GIDDialLobby)
 	app.gui.ApplicationInfoDialog("Lobby closed", "The lobby owner has left the lobby")
 }
@@ -69,13 +84,20 @@ func (app *App) PlayerReadiness(ready string) {
 	app.gui.ApplicationErrDialog(err)
 }
 
+func (app *App) StartMatch() {
+	_, err := app.conn.Write(brp.NewReqStartMatch())
+	app.gui.SendErrDialog(brp.ReqStartMatch, err)
+	app.receiveAndProcessResponse(brp.ReqStartMatch, "Match")
+}
+
 func (app *App) MatchStarted() {
-	app.gui.SendNotification("Match", "implement MatchStarted")
+	app.gui.ApplicationInfoDialog("Match started", "implement MatchStarted")
 }
 
 type lobby struct {
-	app *App // parent App
-	gui *gui.Lobby
+	app      *App // parent App
+	gui      *gui.Lobby
+	playerIn bool
 }
 
 func newLobby(parentApp *App) *lobby {
@@ -85,18 +107,13 @@ func newLobby(parentApp *App) *lobby {
 	}
 }
 
-func (l *lobby) RespLobby(payload []byte) {
+func (app *App) RespLobby(payload []byte) (bool, string) {
 	args := bytes.Split(payload, []byte(" "))
-	ready, err := strconv.ParseBool(string(args[0]))
-	l.app.gui.ApplicationErrDialog(err)
-	name := string(bytes.Join(args[1:], []byte(" ")))
 
-	err = l.gui.Reset("")
-	l.app.gui.ApplicationErrDialog(err)
-	err = l.gui.SecondPlayer.Ready.Set(ready)
-	l.app.gui.ApplicationErrDialog(err)
-	err = l.gui.SecondPlayer.Name.Set(name)
-	l.app.gui.ApplicationErrDialog(err)
+	ready, err := strconv.ParseBool(string(args[0]))
+	app.gui.ApplicationErrDialog(err)
+
+	return ready, string(bytes.Join(args[1:], []byte(" ")))
 }
 
 func (app *App) initLobby() {
@@ -110,7 +127,12 @@ func (app *App) initLobby() {
 
 	dialogLobby := gui.NewLobbyDialog(
 		func(ready bool) { app.SetReadiness(ready) },
-		func() { app.LeaveLobby() },
+		func() {
+			if app.lobby.playerIn {
+				app.LeaveLobby()
+			}
+		},
+		func() { app.StartMatch() },
 		*app.lobby.gui,
 		app.gui.W,
 	)

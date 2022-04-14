@@ -57,6 +57,7 @@ type Lobby struct {
 	Name         binding.String
 	FirstPlayer  *Player
 	SecondPlayer *Player
+	Owner        binding.Bool
 }
 
 func NewLobby() *Lobby {
@@ -64,16 +65,22 @@ func NewLobby() *Lobby {
 		Name:         binding.NewString(),
 		FirstPlayer:  NewPlayer(""),
 		SecondPlayer: NewPlayer(""),
+		Owner:        binding.NewBool(),
 	}
 	return lobby
 }
 
 // Reset players and set lobby name
-func (l *Lobby) Reset(name string) error {
+func (l *Lobby) Reset(name string, owner bool) error {
 	err := l.Name.Set(name)
 	if err != nil {
 		return err
 	}
+	err = l.Owner.Set(owner)
+	if err != nil {
+		return err
+	}
+
 	err = l.FirstPlayer.Name.Set("You")
 	if err != nil {
 		return err
@@ -95,33 +102,44 @@ func (l *Lobby) ResetSecondPlayer() error {
 	return err
 }
 
-func NewLobbyDialog(onReady func(bool), onClosed func(), lobby Lobby, parent fyne.Window) dialog.Dialog {
+func NewLobbyDialog(onReady func(bool), onClosed func(), onStartMach func(), lobby Lobby, parent fyne.Window) dialog.Dialog {
 	lobbyNameLabel := widget.NewLabelWithData(lobby.Name)
 
-	changeReadyLabel := func(check *widget.Check, ready bool) {
-		if ready {
-			check.Text = "Ready"
+	startMatch := widget.NewButton("Start match", func() {
+		onStartMach()
+	})
+	startMatchOwnerListener := binding.NewDataListener(func() {
+		owner, _ := lobby.Owner.Get()
+		if owner {
+			startMatch.Show()
 		} else {
-			check.Text = "Not ready"
+			startMatch.Hide()
 		}
-	}
+	})
+	lobby.Owner.AddListener(startMatchOwnerListener)
+	startMatchReadyListner := binding.NewDataListener(func() {
+		fpReady, _ := lobby.FirstPlayer.Ready.Get()
+		spReady, _ := lobby.SecondPlayer.Ready.Get()
+		if fpReady && spReady {
+			startMatch.Enable()
+		} else {
+			startMatch.Disable()
+		}
+	})
+	lobby.FirstPlayer.Ready.AddListener(startMatchReadyListner)
+	lobby.SecondPlayer.Ready.AddListener(startMatchReadyListner)
+	startMatchCnt := container.NewCenter(startMatch)
 
 	playerNameLabel := widget.NewLabelWithData(lobby.FirstPlayer.Name)
-	playerReadinessCheck := widget.NewCheckWithData("Not ready", lobby.FirstPlayer.Ready)
-	playerReadinessCheck.OnChanged = func(ready bool) {
-		changeReadyLabel(playerReadinessCheck, ready)
-		onReady(ready)
-	}
+	playerReadinessCheck := widget.NewCheckWithData("Ready", lobby.FirstPlayer.Ready)
+	playerReadinessCheck.OnChanged = onReady
 
 	anotherPlayerNameLabel := widget.NewLabelWithData(lobby.SecondPlayer.Name)
-	anotherPlayerReadinessCheck := widget.NewCheckWithData("Not ready", lobby.SecondPlayer.Ready)
+	anotherPlayerReadinessCheck := widget.NewCheckWithData("Ready", lobby.SecondPlayer.Ready)
 	anotherPlayerReadinessCheck.Disable()
-	anotherPlayerReadinessCheck.OnChanged = func(ready bool) {
-		changeReadyLabel(anotherPlayerReadinessCheck, ready)
-	}
 
 	readinessCnt := container.NewGridWithColumns(2, playerNameLabel, playerReadinessCheck, anotherPlayerNameLabel, anotherPlayerReadinessCheck)
-	main := container.NewBorder(container.NewCenter(lobbyNameLabel), readinessCnt, nil, nil)
+	main := container.NewBorder(container.NewCenter(lobbyNameLabel), startMatchCnt, nil, nil, readinessCnt)
 
 	dial := dialog.NewCustom("Lobby", "Leave", main, parent)
 	dial.Resize(fyne.NewSize(350, 100))

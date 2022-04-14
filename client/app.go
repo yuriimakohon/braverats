@@ -3,13 +3,14 @@ package client
 import (
 	"braverats/brp"
 	"braverats/client/gui"
-	"bytes"
+	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"time"
+	"unicode"
+	"unicode/utf8"
 )
 
 type App struct {
@@ -46,18 +47,16 @@ func (app *App) Start() {
 }
 
 func (app *App) init() {
-
 	app.initGameMainMenu()
 }
 
 func (app *App) handleIncomingPackets() {
 	go app.handleEvents()
-	for {
-		packet, err := brp.ReadPacket(app.conn)
-		if err == io.EOF {
-			log.Println("lost connection with server")
-			break
-		}
+	reader := bufio.NewReader(app.conn)
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(brp.ScanCRLF)
+	for scanner.Scan() {
+		packet, err := brp.ParsePacket(scanner.Bytes())
 		if err != nil {
 			log.Println(err)
 			continue
@@ -71,6 +70,12 @@ func (app *App) handleIncomingPackets() {
 			log.Printf("Client can't handle packet %s with %s type", packet, packet.Type)
 		}
 	}
+	err := scanner.Err()
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println("lost connection with server")
+	}
 	app.gui.A.Quit()
 }
 
@@ -78,6 +83,7 @@ func (app *App) handleEvents() {
 	var packet brp.Packet
 	for {
 		packet = <-app.events
+		log.Printf("%s : %s\n", packet.Tag, toUpperFirstLetter(string(packet.Payload)))
 		switch packet.Tag {
 		case brp.EventJoinedLobby:
 			app.JoinedLobby(string(packet.Payload))
@@ -102,27 +108,39 @@ func (app *App) receiveResponse() (brp.Packet, error) {
 	}
 }
 
-func (app *App) receiveAndProcessResponse(tag brp.TAG, title string) bool {
+// receiveAndProcessResponse waits for a response from the server, then logs it.
+//
+// If the response is unsuccessful (RESP_ERR or RESP_INFO), displays appropriate dial.
+//
+// Returns success and the package with response
+func (app *App) receiveAndProcessResponse(tag brp.TAG, title string) (bool, brp.Packet) {
 	resp, err := app.receiveResponse()
 	if err != nil {
 		log.Printf("Error receiving %s request`s response: %v", tag, err)
-		return false
+		return false, resp
 	}
 
-	// Capitalize first letter of response message
-	msg := string(append(bytes.ToUpper(resp.Payload[0:1]), resp.Payload[1:]...))
+	msg := toUpperFirstLetter(string(resp.Payload))
 
 	switch resp.Tag {
 	case brp.RespErr:
 		app.gui.ServerErrDialog(fmt.Sprintf("%s :: %s : %s", tag, resp.Tag, msg))
-		return false
+		return false, resp
 	case brp.RespInfo:
 		log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
 		app.gui.ApplicationInfoDialog(title, msg)
-		return false
-	case brp.RespLobby:
-		app.lobby.RespLobby(resp.Payload)
+		return false, resp
+	default:
+		log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
+		return true, resp
 	}
-	log.Printf("%s :: %s : %s\n", tag, resp.Tag, msg)
-	return true
+}
+
+// toUpperFirstLetter returns a string with the first letter capitalized.
+func toUpperFirstLetter(s string) string {
+	if s == "" {
+		return ""
+	}
+	r, n := utf8.DecodeRuneInString(s)
+	return string(unicode.ToUpper(r)) + s[n:]
 }

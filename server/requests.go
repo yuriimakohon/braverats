@@ -137,9 +137,11 @@ func (c *client) startMatch() {
 	err := c.lobby.startMatch()
 	if err != nil {
 		c.respErr(err)
+		return
 	}
 
 	log.Printf("client %s started match in %s lobby\n", c.id, c.lobby.name)
+	c.respOk("match started")
 	c.matchStarted()
 	c.lobby.secondPlayer.matchStarted()
 }

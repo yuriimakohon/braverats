@@ -9,7 +9,7 @@ import (
 )
 
 // Ending is used to separate packets in the stream.
-var Ending = []byte{0x00, 0xFF, 0xCC}
+var Ending = []byte{'\r', '\n'}
 
 const (
 	MaxPlayerNameLen = 24
@@ -57,6 +57,10 @@ func ReadPacket(reader io.Reader) (packet Packet, err error) {
 		}
 	}
 
+	return ParsePacket(data)
+}
+
+func ParsePacket(data []byte) (packet Packet, err error) {
 	tagBytes := bytes.ToUpper(bytes.TrimSpace(bytes.Split(data, []byte(" "))[0]))
 	packet.Payload = bytes.TrimSpace(bytes.TrimPrefix(data, tagBytes))
 	packet.Tag = TAG(tagBytes)
@@ -74,4 +78,28 @@ func ReadPacket(reader io.Reader) (packet Packet, err error) {
 	}
 
 	return packet, nil
+}
+
+// dropCR drops a terminal \r from the data.
+func dropCR(data []byte) []byte {
+	if len(data) > 0 && data[len(data)-1] == '\r' {
+		return data[0 : len(data)-1]
+	}
+	return data
+}
+
+func ScanCRLF(data []byte, atEOF bool) (advance int, token []byte, err error) {
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+	if i := bytes.Index(data, Ending); i >= 0 {
+		// We have a full newline-terminated line.
+		return i + 2, dropCR(data[0:i]), nil
+	}
+	// If we're at EOF, we have a final, non-terminated line. Return it.
+	if atEOF {
+		return len(data), dropCR(data), nil
+	}
+	// Request more data.
+	return 0, nil, nil
 }
