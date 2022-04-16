@@ -25,6 +25,12 @@ func (app *App) JoinLobby(lobbyName string) {
 	_, err := app.conn.Write(brp.NewReqJoinLobby(lobbyName))
 	app.gui.SendErrDialog(brp.ReqJoinLobby, err)
 	if ok, resp := app.receiveAndProcessResponse(brp.ReqJoinLobby, "Lobby"); ok {
+		ready, nickname, err := brp.ParseRespLobby(resp)
+		if err != nil {
+			app.gui.ApplicationErrDialog(err)
+			return
+		}
+
 		app.lobby.playerIn = true
 
 		err = app.lobby.gui.Reset(lobbyName, false)

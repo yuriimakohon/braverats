@@ -28,3 +28,19 @@ func NewRespLobby(ready bool, name string) []byte {
 	resp = append(resp, Ending...)
 	return resp
 }
+
+func ParseRespLobby(packet Packet) (ready bool, nickname string, err error) {
+	if packet.Tag != RespLobby {
+		return ready, nickname, ErrPacketTagMismatch
+	}
+
+	args := bytes.Split(packet.Payload, []byte(" "))
+
+	ready, err = strconv.ParseBool(string(args[0]))
+	if err != nil {
+		return ready, nickname, err
+	}
+
+	nickname = string(bytes.Join(args[1:], []byte(" ")))
+	return ready, nickname, nil
+}

@@ -30,6 +30,11 @@ const (
 	EventMatchStarted    TAG = "EVENT_MATCH_STARTED"
 )
 
+func IsTAG(tag TAG) bool {
+	_, ok := tags[tag]
+	return ok
+}
+
 // tags is a set of all BRP tags
 var tags = map[TAG]struct{}{
 	ReqSetName:      {},

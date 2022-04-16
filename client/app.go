@@ -58,7 +58,7 @@ func (app *App) handleIncomingPackets() {
 	for scanner.Scan() {
 		packet, err := brp.ParsePacket(scanner.Bytes())
 		if err != nil {
-			log.Println(err)
+			log.Println("Error parsing packet: ", err)
 			continue
 		}
 		switch packet.Type {

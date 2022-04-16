@@ -3,7 +3,6 @@ package brp
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"io"
 	"strings"
 )
@@ -73,8 +72,8 @@ func ParsePacket(data []byte) (packet Packet, err error) {
 		packet.Type = TypeEvent
 	}
 
-	if _, ok := tags[packet.Tag]; !ok {
-		return packet, errors.New("unknown tag: " + string(packet.Tag))
+	if !IsTAG(packet.Tag) {
+		return packet, ErrUnknownTag
 	}
 
 	return packet, nil
