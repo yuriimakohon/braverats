@@ -34,3 +34,9 @@ func NewReqSetReadiness(ready bool) []byte {
 func NewReqStartMatch() []byte {
 	return append([]byte(ReqStartMatch), Ending...)
 }
+
+func NewReqPutCard(card CardID) []byte {
+	resp := append([]byte(ReqPutCard), ' ')
+	resp = append(resp, []byte(strconv.Itoa(int(card)))...)
+	return append(resp, Ending...)
+}

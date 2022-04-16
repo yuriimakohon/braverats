@@ -11,6 +11,7 @@ const (
 	ReqLeaveLobby   TAG = "REQ_LEAVE_LOBBY"
 	ReqSetReadiness TAG = "REQ_SET_READINESS"
 	ReqStartMatch   TAG = "REQ_START_MATCH"
+	ReqPutCard      TAG = "REQ_PUT_CARD"
 )
 
 // Server side response BRP TAGs.
@@ -28,6 +29,8 @@ const (
 	EventLobbyClosed     TAG = "EVENT_LOBBY_CLOSED"
 	EventPlayerReadiness TAG = "EVENT_PLAYER_READINESS"
 	EventMatchStarted    TAG = "EVENT_MATCH_STARTED"
+	EventCardPut         TAG = "EVENT_CARD_PUT"
+	EventRoundEnded      TAG = "EVENT_ROUND_ENDED"
 )
 
 func IsTAG(tag TAG) bool {
@@ -43,6 +46,7 @@ var tags = map[TAG]struct{}{
 	ReqLeaveLobby:   {},
 	ReqSetReadiness: {},
 	ReqStartMatch:   {},
+	ReqPutCard:      {},
 
 	RespOk:    {},
 	RespErr:   {},
@@ -54,4 +58,6 @@ var tags = map[TAG]struct{}{
 	EventLobbyClosed:     {},
 	EventPlayerReadiness: {},
 	EventMatchStarted:    {},
+	EventCardPut:         {},
+	EventRoundEnded:      {},
 }

@@ -3,7 +3,6 @@ package client
 import (
 	"braverats/brp"
 	"braverats/client/gui"
-	"bytes"
 	"fmt"
 	"strconv"
 )
@@ -36,10 +35,9 @@ func (app *App) JoinLobby(lobbyName string) {
 		err = app.lobby.gui.Reset(lobbyName, false)
 		app.gui.ApplicationErrDialog(err)
 
-		ready, opponentName := app.RespLobby(resp.Payload)
 		err = app.lobby.gui.SecondPlayer.Ready.Set(ready)
 		app.gui.ApplicationErrDialog(err)
-		err = app.lobby.gui.SecondPlayer.Name.Set(opponentName)
+		err = app.lobby.gui.SecondPlayer.Name.Set(nickname)
 		app.gui.ApplicationErrDialog(err)
 
 		app.gui.ShowDialog(gui.GIDDialLobby)
@@ -111,15 +109,6 @@ func newLobby(parentApp *App) *lobby {
 		app: parentApp,
 		gui: gui.NewLobby(),
 	}
-}
-
-func (app *App) RespLobby(payload []byte) (bool, string) {
-	args := bytes.Split(payload, []byte(" "))
-
-	ready, err := strconv.ParseBool(string(args[0]))
-	app.gui.ApplicationErrDialog(err)
-
-	return ready, string(bytes.Join(args[1:], []byte(" ")))
 }
 
 func (app *App) initLobby() {
