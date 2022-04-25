@@ -19,9 +19,7 @@ func (app *App) SetNickname(name string) {
 	}
 }
 
-func (app *App) initGameMainMenu() {
-	app.initLobby()
-
+func (app *App) initGameMainMenuScene() {
 	dialogQuitConfirm := dialog.NewConfirm(
 		"Quit", "Are you sure you want to quit the game?",
 		func(ok bool) {
@@ -78,5 +76,6 @@ func (app *App) initGameMainMenu() {
 	mainGameMenuVBox.Add(joinLobbyBtn)
 	mainGameMenuVBox.Add(gameQuitBtn)
 
-	app.gui.W.SetContent(mainGameMenuVBox)
+	app.gui.AddScene(gui.GIDMainMenu, mainGameMenuVBox)
+	app.gui.ShowScene(gui.GIDMainMenu)
 }

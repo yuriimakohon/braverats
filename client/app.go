@@ -19,6 +19,7 @@ type App struct {
 	events    chan brp.Packet // channel for events from server
 	gui       gui.GUI
 	lobby     *lobby
+	match     *match
 }
 
 // NewApp creates a new Brave Rats game client application. addr parameter is game server address.
@@ -47,7 +48,10 @@ func (app *App) Start() {
 }
 
 func (app *App) init() {
-	app.initGameMainMenu()
+	gui.InitImages()
+	app.initLobbyDialog()
+	app.initMatchScene()
+	app.initGameMainMenuScene()
 }
 
 func (app *App) handleIncomingPackets() {

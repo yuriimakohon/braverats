@@ -3,7 +3,8 @@ package brp
 type CardID uint8
 
 const (
-	CardMusician CardID = iota
+	CardUnknown CardID = iota
+	CardMusician
 	CardPrincess
 	CardSpy
 	CardAssassin
@@ -24,6 +25,7 @@ func IsCardID(id CardID) bool {
 
 // cardIDs is a set of all CardIDs.
 var cardIDs = map[CardID]struct{}{
+	CardUnknown:    {},
 	CardMusician:   {},
 	CardPrincess:   {},
 	CardSpy:        {},

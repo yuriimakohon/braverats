@@ -12,11 +12,13 @@ type client struct {
 	id     uuid.UUID
 	conn   net.Conn
 	server *Server
+	name   string
 
-	name       string
 	lobby      *lobby
 	lobbyOwner bool
 	ready      bool
+
+	match *match
 }
 
 func newClient(conn net.Conn, server *Server) *client {

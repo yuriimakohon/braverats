@@ -2,6 +2,7 @@ package server
 
 import (
 	"braverats/brp"
+	"strconv"
 )
 
 func (c *client) joinedLobby(name string) {
@@ -32,4 +33,16 @@ func (c *client) matchStarted() {
 	c.logResponse(brp.EventMatchStarted, "")
 	_, err := c.conn.Write(brp.NewEventMatchStarted())
 	c.handleWriteErr(brp.EventMatchStarted, err)
+}
+
+func (c *client) cardPut(faceUp bool, card brp.CardID) {
+	c.logResponse(brp.EventCardPut, strconv.Itoa(card.Int()))
+	_, err := c.conn.Write(brp.NewEventCardPut(faceUp, card))
+	c.handleWriteErr(brp.EventCardPut, err)
+}
+
+func (c *client) roundEnded(result brp.RoundResult, card brp.CardID) {
+	c.logResponse(brp.EventRoundEnded, strconv.Itoa(result.Int()))
+	_, err := c.conn.Write(brp.NewEventRoundEnded(result, card))
+	c.handleWriteErr(brp.EventRoundEnded, err)
 }
