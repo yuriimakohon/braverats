@@ -105,15 +105,15 @@ func (l *Lobby) ResetSecondPlayer() error {
 func NewLobbyDialog(onReady func(bool), onClosed func(), onStartMach func(), lobby Lobby, parent fyne.Window) dialog.Dialog {
 	lobbyNameLabel := widget.NewLabelWithData(lobby.Name)
 
-	startMatch := widget.NewButton("Start match", func() {
+	startMatchBtn := widget.NewButton("Start match", func() {
 		onStartMach()
 	})
 	startMatchOwnerListener := binding.NewDataListener(func() {
 		owner, _ := lobby.Owner.Get()
 		if owner {
-			startMatch.Show()
+			startMatchBtn.Show()
 		} else {
-			startMatch.Hide()
+			startMatchBtn.Hide()
 		}
 	})
 	lobby.Owner.AddListener(startMatchOwnerListener)
@@ -121,14 +121,14 @@ func NewLobbyDialog(onReady func(bool), onClosed func(), onStartMach func(), lob
 		fpReady, _ := lobby.FirstPlayer.Ready.Get()
 		spReady, _ := lobby.SecondPlayer.Ready.Get()
 		if fpReady && spReady {
-			startMatch.Enable()
+			startMatchBtn.Enable()
 		} else {
-			startMatch.Disable()
+			startMatchBtn.Disable()
 		}
 	})
 	lobby.FirstPlayer.Ready.AddListener(startMatchReadyListner)
 	lobby.SecondPlayer.Ready.AddListener(startMatchReadyListner)
-	startMatchCnt := container.NewCenter(startMatch)
+	startMatchCnt := container.NewCenter(startMatchBtn)
 
 	playerNameLabel := widget.NewLabelWithData(lobby.FirstPlayer.Name)
 	playerReadinessCheck := widget.NewCheckWithData("Ready", lobby.FirstPlayer.Ready)

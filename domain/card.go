@@ -1,41 +1,26 @@
 package domain
 
 import (
+	"braverats/brp"
 	"errors"
 	"sort"
 )
 
-type CardID uint8
-
-const (
-	Prince CardID = iota
-	General
-	Wizard
-	Ambassador
-	Assassin
-	Spy
-	Princess
-	Musician
-)
-
 type Card struct {
-	CardID
-	Name        string
-	Description string
-	Power       uint8
+	ID    brp.CardID
+	Power uint8
 }
 
-type CardHand []Card
+type CardHand []*Card
 
-func (hand *CardHand) ExtractCard(idx uint8) (Card, error) {
-	if idx < 0 || idx >= uint8(len(*hand)) {
-		return Card{}, errors.New("index of card is out of hand range")
+func (hand *CardHand) ExtractCard(id brp.CardID) (*Card, error) {
+	for i, card := range *hand {
+		if card.ID == id {
+			*hand = append((*hand)[:i], (*hand)[i+1:]...)
+			return card, nil
+		}
 	}
-
-	card := (*hand)[idx]
-	*hand = append((*hand)[:idx], (*hand)[idx+1:]...)
-
-	return card, nil
+	return nil, errors.New("card not found")
 }
 
 func (hand *CardHand) Sort() {
@@ -44,46 +29,38 @@ func (hand *CardHand) Sort() {
 	})
 }
 
-var standardDeck = map[CardID]Card{
-	Prince: {
-		CardID: Prince,
-		Name:   "Prince",
-		Power:  7,
+var standardDeck = map[brp.CardID]Card{
+	brp.CardPrince: {
+		ID:    brp.CardPrince,
+		Power: 7,
 	},
-	General: {
-		CardID: General,
-		Name:   "General",
-		Power:  6,
+	brp.CardGeneral: {
+		ID:    brp.CardGeneral,
+		Power: 6,
 	},
-	Wizard: {
-		CardID: Wizard,
-		Name:   "Wizard",
-		Power:  5,
+	brp.CardWizard: {
+		ID:    brp.CardWizard,
+		Power: 5,
 	},
-	Ambassador: {
-		CardID: Ambassador,
-		Name:   "Ambassador",
-		Power:  4,
+	brp.CardAmbassador: {
+		ID:    brp.CardAmbassador,
+		Power: 4,
 	},
-	Assassin: {
-		CardID: Assassin,
-		Name:   "Assassin",
-		Power:  3,
+	brp.CardAssassin: {
+		ID:    brp.CardAssassin,
+		Power: 3,
 	},
-	Spy: {
-		CardID: Spy,
-		Name:   "Spy",
-		Power:  2,
+	brp.CardSpy: {
+		ID:    brp.CardSpy,
+		Power: 2,
 	},
-	Princess: {
-		CardID: Princess,
-		Name:   "Princess",
-		Power:  1,
+	brp.CardPrincess: {
+		ID:    brp.CardPrincess,
+		Power: 1,
 	},
-	Musician: {
-		CardID: Musician,
-		Name:   "Musician",
-		Power:  0,
+	brp.CardMusician: {
+		ID:    brp.CardMusician,
+		Power: 0,
 	},
 }
 
@@ -91,7 +68,7 @@ func StandardHand() CardHand {
 	var hand CardHand
 
 	for _, card := range standardDeck {
-		hand = append(hand, card)
+		hand = append(hand, &card)
 	}
 
 	hand.Sort()

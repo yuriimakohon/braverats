@@ -1,6 +1,8 @@
 package server
 
 import (
+	"braverats/brp"
+	"braverats/domain"
 	"errors"
 	"fmt"
 	"log"
@@ -134,14 +136,84 @@ func (c *client) startMatch() {
 		return
 	}
 
-	err := c.lobby.startMatch()
-	if err != nil {
-		c.respErr(err)
-		return
+	c.match = &match{
+		m:            domain.NewStandardMatch(),
+		firstPlayer:  c,
+		secondPlayer: c.lobby.secondPlayer,
 	}
+	c.lobby.secondPlayer.match = c.match
 
 	log.Printf("client %s started match in %s lobby\n", c.id, c.lobby.name)
 	c.respOk("match started")
 	c.matchStarted()
 	c.lobby.secondPlayer.matchStarted()
+}
+
+func (c *client) putCard(args []byte) {
+	if c.match == nil {
+		c.respErr(errors.New("you are not in a match"))
+		return
+	}
+
+	isFirstPlayer := c.id == c.match.firstPlayer.id
+
+	card, err := c.match.putCard(isFirstPlayer, args)
+	if err != nil {
+		c.respErr(err)
+		return
+	}
+
+	var opponentCard *domain.Card
+	var opponent *client
+	if isFirstPlayer {
+		opponentCard = c.match.spCard
+		opponent = c.match.secondPlayer
+	} else {
+		opponentCard = c.match.fpCard
+		opponent = c.match.firstPlayer
+	}
+
+	var faceUp, opponentFaceUp bool
+
+	lastRound := c.match.m.GetLastRound()
+	if lastRound != nil {
+		faceUp = isFirstPlayer && lastRound.Effects.Has(domain.SPSpyPlayed) || !isFirstPlayer && lastRound.Effects.Has(domain.FPSpyPlayed)
+		opponentFaceUp = isFirstPlayer && lastRound.Effects.Has(domain.FPSpyPlayed) || !isFirstPlayer && lastRound.Effects.Has(domain.SPSpyPlayed)
+
+		if opponentFaceUp && opponentCard == nil {
+			c.respErr(errors.New("you can't put a card first after spy played"))
+			return
+		}
+	}
+
+	c.respOk("")
+	opponent.cardPut(faceUp, card.ID)
+
+	if opponentCard != nil {
+		round, err := c.match.m.PlayRound(*card, *opponentCard)
+		if err != nil {
+			c.respErr(err)
+			return
+		}
+		switch round.Result {
+		case domain.FPWR:
+			c.roundEnded(brp.WinRound, opponentCard.ID)
+			opponent.roundEnded(brp.LoseRound, card.ID)
+		case domain.SPWR:
+			c.roundEnded(brp.LoseRound, opponentCard.ID)
+			opponent.roundEnded(brp.WinRound, card.ID)
+		case domain.Hold:
+			c.roundEnded(brp.HoldRound, opponentCard.ID)
+			opponent.roundEnded(brp.HoldRound, card.ID)
+		case domain.FPWG:
+			c.roundEnded(brp.WinGame, opponentCard.ID)
+			opponent.roundEnded(brp.LoseGame, card.ID)
+		case domain.SPWG:
+			c.roundEnded(brp.LoseGame, opponentCard.ID)
+			opponent.roundEnded(brp.WinGame, card.ID)
+		case domain.Draw:
+			c.roundEnded(brp.DrawGame, opponentCard.ID)
+			opponent.roundEnded(brp.DrawGame, card.ID)
+		}
+	}
 }

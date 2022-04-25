@@ -1,8 +1,8 @@
 package domain
 
 import (
+	"braverats/brp"
 	"errors"
-	"fmt"
 )
 
 type Match struct {
@@ -26,17 +26,7 @@ func NewStandardMatch() *Match {
 	return match
 }
 
-func (m *Match) PlayRound(fpChoice, spChoice uint8) (Round, error) {
-	fpCard, err := m.FPHand.ExtractCard(fpChoice)
-	if err != nil {
-		return Round{}, fmt.Errorf("first player: %v", err)
-	}
-
-	spCard, err := m.SPHand.ExtractCard(spChoice)
-	if err != nil {
-		return Round{}, fmt.Errorf("second player: %v", err)
-	}
-
+func (m *Match) PlayRound(fpCard, spCard Card) (Round, error) {
 	if len(m.Rounds) != 0 {
 		lastRound := m.GetLastRound()
 		if lastRound.Effects.Has(FPGeneralPlayed) {
@@ -65,10 +55,10 @@ func (m *Match) GetLastRound() *Round {
 func (m *Match) brawlCards(fpCard, spCard Card) (Round, error) {
 	var round Round
 
-	brawl, ok := BrawlFunctions[[2]CardID{fpCard.CardID, spCard.CardID}]
+	brawl, ok := BrawlFunctions[[2]brp.CardID{fpCard.ID, spCard.ID}]
 	if ok {
 		round = brawl(fpCard, spCard)
-	} else if brawl, ok = BrawlFunctions[[2]CardID{spCard.CardID, fpCard.CardID}]; ok {
+	} else if brawl, ok = BrawlFunctions[[2]brp.CardID{spCard.ID, fpCard.ID}]; ok {
 		round = brawl(spCard, fpCard)
 		inverseRound(&round)
 	} else {

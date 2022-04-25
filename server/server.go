@@ -112,5 +112,7 @@ func (s *Server) handleReq(packet brp.Packet, c *client) {
 		c.setReadiness(packet.Payload)
 	case brp.ReqStartMatch:
 		c.startMatch()
+	case brp.ReqPutCard:
+		c.putCard(packet.Payload)
 	}
 }

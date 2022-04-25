@@ -1,33 +1,22 @@
 package main
 
 import (
-	"log"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"fyne.io/fyne/v2"
+	app2 "fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 )
 
-type Person struct {
-	gorm.Model
-	Name    string
-	Surname string
-}
-
 func main() {
-	db, err := gorm.Open(postgres.Open("postgres://user:pwd@localhost:5432/gorm-db?sslmode=disable"))
-	if err != nil {
-		log.Fatal(err)
-	}
+	app := app2.New()
+	w := app.NewWindow("Test")
+	w.CenterOnScreen()
+	w.Resize(fyne.NewSize(200, 200))
 
-	err = db.AutoMigrate(&Person{})
-	if err != nil {
-		log.Fatal(err)
-	}
+	first := container.NewCenter(widget.NewLabel("First"))
+	second := container.NewCenter(widget.NewLabel("Second"))
 
-	// db.Create(&Person{Name: "John", Surname: "Smith"})
-	// db.Create(&Person{Name: "Fred"})
-
-	var count int64
-	db.Model(&Person{}).Where("name = ?", "John").Count(&count)
-	log.Println(count)
+	w.SetContent(first)
+	w.SetContent(second)
+	w.ShowAndRun()
 }

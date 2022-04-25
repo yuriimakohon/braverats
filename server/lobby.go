@@ -33,6 +33,5 @@ func (l *lobby) startMatch() error {
 		return errors.New("all players must be ready")
 	}
 
-	// TODO: create and start match
 	return nil
 }

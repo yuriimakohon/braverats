@@ -95,7 +95,9 @@ func (app *App) StartMatch() {
 }
 
 func (app *App) MatchStarted() {
-	app.gui.ApplicationInfoDialog("Match started", "implement MatchStarted")
+	app.RenderMatch()
+	app.gui.ShowScene(gui.GIDMatch)
+	app.gui.HideDialog(gui.GIDDialLobby)
 }
 
 type lobby struct {
@@ -111,7 +113,7 @@ func newLobby(parentApp *App) *lobby {
 	}
 }
 
-func (app *App) initLobby() {
+func (app *App) initLobbyDialog() {
 	dialogCreateLobby := gui.NewLobbyCreatorDialog("Create lobby", "Create",
 		func(name string) { app.CreateLobby(name) }, app.gui.W)
 	app.gui.AddDialog(gui.GIDDialCreateLobby, dialogCreateLobby)
@@ -123,7 +125,7 @@ func (app *App) initLobby() {
 	dialogLobby := gui.NewLobbyDialog(
 		func(ready bool) { app.SetReadiness(ready) },
 		func() {
-			if app.lobby.playerIn {
+			if app.lobby.playerIn && app.match == nil {
 				app.LeaveLobby()
 			}
 		},
