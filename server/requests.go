@@ -163,13 +163,15 @@ func (c *client) putCard(args []byte) {
 		return
 	}
 
-	var opponentCard *domain.Card
+	var opponentCard, playerCard **domain.Card
 	var opponent *client
 	if isFirstPlayer {
-		opponentCard = c.match.spCard
+		playerCard = &c.match.fpCard
+		opponentCard = &c.match.spCard
 		opponent = c.match.secondPlayer
 	} else {
-		opponentCard = c.match.fpCard
+		playerCard = &c.match.spCard
+		opponentCard = &c.match.fpCard
 		opponent = c.match.firstPlayer
 	}
 
@@ -186,34 +188,38 @@ func (c *client) putCard(args []byte) {
 		}
 	}
 
-	c.respOk("")
-	opponent.cardPut(faceUp, card.ID)
+	*playerCard = card
 
-	if opponentCard != nil {
-		round, err := c.match.m.PlayRound(*card, *opponentCard)
+	c.respOk("")
+	opponent.cardPut(faceUp, (*playerCard).ID)
+
+	if *opponentCard != nil {
+		round, err := c.match.m.PlayRound(*card, **opponentCard)
 		if err != nil {
 			c.respErr(err)
 			return
 		}
 		switch round.Result {
 		case domain.FPWR:
-			c.roundEnded(brp.WinRound, opponentCard.ID)
+			c.roundEnded(brp.WinRound, (*opponentCard).ID)
 			opponent.roundEnded(brp.LoseRound, card.ID)
 		case domain.SPWR:
-			c.roundEnded(brp.LoseRound, opponentCard.ID)
+			c.roundEnded(brp.LoseRound, (*opponentCard).ID)
 			opponent.roundEnded(brp.WinRound, card.ID)
 		case domain.Hold:
-			c.roundEnded(brp.HoldRound, opponentCard.ID)
+			c.roundEnded(brp.HoldRound, (*opponentCard).ID)
 			opponent.roundEnded(brp.HoldRound, card.ID)
 		case domain.FPWG:
-			c.roundEnded(brp.WinGame, opponentCard.ID)
+			c.roundEnded(brp.WinGame, (*opponentCard).ID)
 			opponent.roundEnded(brp.LoseGame, card.ID)
 		case domain.SPWG:
-			c.roundEnded(brp.LoseGame, opponentCard.ID)
+			c.roundEnded(brp.LoseGame, (*opponentCard).ID)
 			opponent.roundEnded(brp.WinGame, card.ID)
 		case domain.Draw:
-			c.roundEnded(brp.DrawGame, opponentCard.ID)
+			c.roundEnded(brp.DrawGame, (*opponentCard).ID)
 			opponent.roundEnded(brp.DrawGame, card.ID)
 		}
+		*playerCard = nil
+		*opponentCard = nil
 	}
 }

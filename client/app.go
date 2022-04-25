@@ -51,6 +51,7 @@ func (app *App) init() {
 	gui.InitImages()
 	app.initLobbyDialog()
 	app.initMatchScene()
+	app.initMatchDialog()
 	app.initGameMainMenuScene()
 }
 
@@ -99,6 +100,10 @@ func (app *App) handleEvents() {
 			app.PlayerReadiness(string(packet.Payload))
 		case brp.EventMatchStarted:
 			app.MatchStarted()
+		case brp.EventCardPut:
+			app.CardPut(packet)
+		case brp.EventRoundEnded:
+			app.RoundEnded(packet)
 		}
 	}
 }

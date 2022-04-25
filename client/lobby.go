@@ -70,11 +70,19 @@ func (app *App) JoinedLobby(name string) {
 func (app *App) LeftLobby(name string) {
 	app.gui.SendNotification("Lobby", fmt.Sprintf("%s left the lobby", name))
 
+	if app.match.playerIn {
+		app.closeMatch()
+		app.gui.ShowDialog(gui.GIDDialLobby)
+	}
+
 	err := app.lobby.gui.ResetSecondPlayer()
 	app.gui.ApplicationErrDialog(err)
 }
 
 func (app *App) LobbyClosed() {
+	if app.match.playerIn {
+		app.closeMatch()
+	}
 	app.lobby.playerIn = false
 	app.gui.HideDialog(gui.GIDDialLobby)
 	app.gui.ApplicationInfoDialog("Lobby closed", "The lobby owner has left the lobby")
@@ -95,7 +103,8 @@ func (app *App) StartMatch() {
 }
 
 func (app *App) MatchStarted() {
-	app.RenderMatch()
+	app.match.playerIn = true
+	app.RenderNewMatch()
 	app.gui.ShowScene(gui.GIDMatch)
 	app.gui.HideDialog(gui.GIDDialLobby)
 }

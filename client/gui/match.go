@@ -40,14 +40,29 @@ func NewMatch(parentScene *fyne.Container) *Match {
 	}
 }
 
-func (m *Match) AddPlayerHandCards(ids ...brp.CardID) {
+func (m *Match) ClearMatch() {
+	clearContainer(m.enemyHandContainer)
+	clearContainer(m.playerHandContainer)
+	clearContainer(m.playerTableContainer)
+	clearContainer(m.enemyTableContainer)
+}
+
+func clearContainer(container *fyne.Container) {
+	for _, child := range container.Objects {
+		container.Remove(child)
+	}
+}
+
+func (m *Match) AddPlayerHandCards(f func(id brp.CardID) bool, ids ...brp.CardID) {
 	for _, id := range ids {
 		card := NewPlayerCard(id)
 		card.OnTap = func() {
-			m.showCard.Hide()
-			m.playerHandContainer.Remove(card)
-			m.playerHandContainer.Refresh()
-			m.PutCardOnPlayerTable(card.CardID)
+			if f(card.CardID) {
+				m.showCard.Hide()
+				m.playerHandContainer.Remove(card)
+				m.playerHandContainer.Refresh()
+				m.PutCardOnPlayerTable(card.CardID)
+			}
 		}
 		card.OnMouseIn = func() {
 			m.showCard.ShowRecourse(card.image.Resource)
@@ -75,27 +90,29 @@ func (m *Match) PutCardOnPlayerTable(id brp.CardID) {
 
 func (m *Match) PutCardOnEnemyTable(id brp.CardID) {
 	card := NewTableCard(id)
-	card.OnMouseIn = nil
-	card.OnMouseOut = nil
+	if id == brp.CardUnknown {
+		card.OnMouseIn = nil
+		card.OnMouseOut = nil
+	}
 	m.enemyTableContainer.Add(card)
 	m.enemyTableContainer.Refresh()
 }
 
 func (m *Match) AddEnemyHandCards(count uint8) {
 	for i := uint8(0); i < count; i++ {
-		card := NewCard(brp.CardUnknown)
-
-		card.OnTap = func() {
-			m.enemyHandContainer.Remove(card)
-			m.enemyHandContainer.Refresh()
-			m.PutCardOnEnemyTable(card.CardID)
-		}
-		m.enemyHandContainer.Add(card)
+		m.enemyHandContainer.Add(NewCard(brp.CardUnknown))
 	}
 }
 
-func (m *Match) RemoveEnemyCard(count uint8) {
+func (m *Match) RemoveEnemyHandCard(count uint8) {
 	for i := uint8(0); i < count; i++ {
 		m.enemyHandContainer.Remove(m.enemyHandContainer.Objects[0])
+	}
+}
+
+func (m *Match) RemoveEnemyTableCard(count uint8) {
+	for i := uint8(0); i < count; i++ {
+		size := len(m.enemyTableContainer.Objects)
+		m.enemyTableContainer.Remove(m.enemyTableContainer.Objects[size-1])
 	}
 }

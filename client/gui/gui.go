@@ -23,6 +23,7 @@ const (
 	GIDDialCreateLobby
 	GIDDialJoinLobby
 	GIDDialLobby
+	GIDDialMatchEnd
 	GIDMainMenu
 	GIDMatch
 )

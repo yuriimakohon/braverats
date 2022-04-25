@@ -68,7 +68,10 @@ func StandardHand() CardHand {
 	var hand CardHand
 
 	for _, card := range standardDeck {
-		hand = append(hand, &card)
+		hand = append(hand, &Card{
+			ID:    card.ID,
+			Power: card.Power,
+		})
 	}
 
 	hand.Sort()
