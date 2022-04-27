@@ -61,26 +61,58 @@ func (c *Card) SetMinSize(size fyne.Size) {
 	c.image.SetMinSize(size)
 }
 
-func NewCard(id brp.CardID) *Card {
+func NewCard(id brp.CardID, team bool) *Card {
 	var resource fyne.Resource
 	switch id {
-	case brp.CardUnknown:
+	default:
 		resource = assets.ResourceSuitPng
 	case brp.CardMusician:
+		if team {
+			resource = assets.ResourceMusicianredPng
+			break
+		}
 		resource = assets.ResourceMusicianbluePng
 	case brp.CardPrincess:
+		if team {
+			resource = assets.ResourcePrincessredPng
+			break
+		}
 		resource = assets.ResourcePrincessbluePng
 	case brp.CardSpy:
+		if team {
+			resource = assets.ResourceSpyredPng
+			break
+		}
 		resource = assets.ResourceSpybluePng
 	case brp.CardAssassin:
+		if team {
+			resource = assets.ResourceAssassinredPng
+			break
+		}
 		resource = assets.ResourceAssassinbluePng
 	case brp.CardAmbassador:
+		if team {
+			resource = assets.ResourceAmbassadorredPng
+			break
+		}
 		resource = assets.ResourceAmbassadorbluePng
 	case brp.CardWizard:
+		if team {
+			resource = assets.ResourceWizardredPng
+			break
+		}
 		resource = assets.ResourceWizardbluePng
 	case brp.CardGeneral:
+		if team {
+			resource = assets.ResourceGeneralredPng
+			break
+		}
 		resource = assets.ResourceGeneralbluePng
 	case brp.CardPrince:
+		if team {
+			resource = assets.ResourcePrinceredPng
+			break
+		}
 		resource = assets.ResourcePrincebluePng
 	}
 	image := canvas.NewImageFromResource(resource)
@@ -131,9 +163,9 @@ func OnMouseOutTableStandard(card *TableCard) {
 	card.image.Move(fyne.NewPos(0, 0))
 }
 
-func NewTableCard(id brp.CardID) *TableCard {
+func NewTableCard(id brp.CardID, team bool) *TableCard {
 	card := &TableCard{
-		Card: NewCard(id),
+		Card: NewCard(id, team),
 	}
 	card.OnMouseIn = func() {
 		OnMouseInTableStandard(card)
@@ -171,9 +203,9 @@ func (c *PlayerCard) MouseOut() {
 func (c *PlayerCard) MouseMoved(event *desktop.MouseEvent) {
 }
 
-func NewPlayerCard(id brp.CardID) *PlayerCard {
+func NewPlayerCard(id brp.CardID, team bool) *PlayerCard {
 	card := &PlayerCard{
-		Card:       NewCard(id),
+		Card:       NewCard(id, team),
 		defaultPos: fyne.NewPos(0, 0),
 	}
 	size := fyne.NewSize(100, 150)
@@ -191,7 +223,7 @@ type ShowCard struct {
 
 func NewShowCard() *ShowCard {
 	card := &ShowCard{
-		Card: NewCard(brp.CardUnknown),
+		Card: NewCard(brp.CardUnknown, false),
 	}
 	card.image.Hide()
 	card.SetMinSize(fyne.NewSize(200, 300))

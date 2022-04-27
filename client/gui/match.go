@@ -55,7 +55,7 @@ func clearContainer(container *fyne.Container) {
 
 func (m *Match) AddPlayerHandCards(f func(id brp.CardID) bool, ids ...brp.CardID) {
 	for _, id := range ids {
-		card := NewPlayerCard(id)
+		card := NewPlayerCard(id, false)
 		card.OnTap = func() {
 			if f(card.CardID) {
 				m.showCard.Hide()
@@ -75,7 +75,7 @@ func (m *Match) AddPlayerHandCards(f func(id brp.CardID) bool, ids ...brp.CardID
 }
 
 func (m *Match) PutCardOnPlayerTable(id brp.CardID) {
-	card := NewTableCard(id)
+	card := NewTableCard(id, false)
 	card.OnMouseIn = func() {
 		OnMouseInTableStandard(card)
 		m.showCard.ShowRecourse(card.image.Resource)
@@ -89,7 +89,7 @@ func (m *Match) PutCardOnPlayerTable(id brp.CardID) {
 }
 
 func (m *Match) PutCardOnEnemyTable(id brp.CardID) {
-	card := NewTableCard(id)
+	card := NewTableCard(id, true)
 	if id == brp.CardUnknown {
 		card.OnMouseIn = nil
 		card.OnMouseOut = nil
@@ -109,7 +109,7 @@ func (m *Match) PutCardOnEnemyTable(id brp.CardID) {
 
 func (m *Match) AddEnemyHandCards(count uint8) {
 	for i := uint8(0); i < count; i++ {
-		m.enemyHandContainer.Add(NewCard(brp.CardUnknown))
+		m.enemyHandContainer.Add(NewCard(brp.CardUnknown, false))
 	}
 }
 

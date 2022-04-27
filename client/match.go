@@ -3,7 +3,9 @@ package client
 import (
 	"braverats/brp"
 	"braverats/client/gui"
+	"braverats/client/gui/assets"
 
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
@@ -17,7 +19,9 @@ type match struct {
 }
 
 func (app *App) initMatchScene() {
-	matchContainer := container.NewMax()
+	background := canvas.NewImageFromResource(assets.ResourceCastlePng)
+	background.Translucency = 0.6
+	matchContainer := container.NewMax(background)
 	guiMatch := gui.NewMatch(matchContainer)
 
 	app.match = &match{

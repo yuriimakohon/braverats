@@ -3,9 +3,11 @@ package client
 import (
 	"braverats/brp"
 	"braverats/client/gui"
+	"braverats/client/gui/assets"
 	"errors"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
@@ -69,6 +71,9 @@ func (app *App) initGameMainMenuScene() {
 	gameQuitBtn.Resize(btnMinSize)
 	gameQuitBtn.Move(fyne.NewPos(gui.GameWindowWidth/2-btnMinSize.Width/2, gui.GameWindowHeight/1.2-btnMinSize.Height/2))
 
+	background := canvas.NewImageFromResource(assets.ResourceCastlePng)
+	background.Translucency = 0.9
+
 	mainGameMenuVBox := container.NewWithoutLayout()
 	mainGameMenuVBox.Add(nicknameEntry)
 	mainGameMenuVBox.Add(saveNicknameBtn)
@@ -76,6 +81,8 @@ func (app *App) initGameMainMenuScene() {
 	mainGameMenuVBox.Add(joinLobbyBtn)
 	mainGameMenuVBox.Add(gameQuitBtn)
 
-	app.gui.AddScene(gui.GIDMainMenu, mainGameMenuVBox)
+	mainMenuMenuScene := container.NewMax(background, mainGameMenuVBox)
+
+	app.gui.AddScene(gui.GIDMainMenu, mainMenuMenuScene)
 	app.gui.ShowScene(gui.GIDMainMenu)
 }

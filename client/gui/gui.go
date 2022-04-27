@@ -88,9 +88,7 @@ func (gui *GUI) ShowScene(gid GID) {
 		log.Println("scene not found: ", gid)
 		return
 	}
-	// gui.W.Content().Hide()
 	gui.W.SetContent(scene)
-	// gui.W.Content().Show()
 }
 
 func (gui *GUI) checkScene(gid GID) (*fyne.Container, bool) {
