@@ -117,7 +117,7 @@ func NewLobbyDialog(onReady func(bool), onClosed func(), onStartMach func(), lob
 		}
 	})
 	lobby.Owner.AddListener(startMatchOwnerListener)
-	startMatchReadyListner := binding.NewDataListener(func() {
+	startMatchReadyListener := binding.NewDataListener(func() {
 		fpReady, _ := lobby.FirstPlayer.Ready.Get()
 		spReady, _ := lobby.SecondPlayer.Ready.Get()
 		if fpReady && spReady {
@@ -126,8 +126,8 @@ func NewLobbyDialog(onReady func(bool), onClosed func(), onStartMach func(), lob
 			startMatchBtn.Disable()
 		}
 	})
-	lobby.FirstPlayer.Ready.AddListener(startMatchReadyListner)
-	lobby.SecondPlayer.Ready.AddListener(startMatchReadyListner)
+	lobby.FirstPlayer.Ready.AddListener(startMatchReadyListener)
+	lobby.SecondPlayer.Ready.AddListener(startMatchReadyListener)
 	startMatchCnt := container.NewCenter(startMatchBtn)
 
 	playerNameLabel := widget.NewLabelWithData(lobby.FirstPlayer.Name)
