@@ -93,6 +93,15 @@ func (m *Match) PutCardOnEnemyTable(id brp.CardID) {
 	if id == brp.CardUnknown {
 		card.OnMouseIn = nil
 		card.OnMouseOut = nil
+	} else {
+		card.OnMouseIn = func() {
+			OnMouseInTableStandard(card)
+			m.showCard.ShowRecourse(card.image.Resource)
+		}
+		card.OnMouseOut = func() {
+			OnMouseOutTableStandard(card)
+			m.showCard.Hide()
+		}
 	}
 	m.enemyTableContainer.Add(card)
 	m.enemyTableContainer.Refresh()
