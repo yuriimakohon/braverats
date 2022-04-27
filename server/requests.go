@@ -155,71 +155,78 @@ func (c *client) putCard(args []byte) {
 		return
 	}
 
-	isFirstPlayer := c.id == c.match.firstPlayer.id
-
-	card, err := c.match.putCard(isFirstPlayer, args)
-	if err != nil {
-		c.respErr(err)
-		return
+	type player struct {
+		c      *client
+		faceUp bool
+		card   **domain.Card
 	}
 
-	var opponentCard, playerCard **domain.Card
-	var opponent *client
-	if isFirstPlayer {
-		playerCard = &c.match.fpCard
-		opponentCard = &c.match.spCard
-		opponent = c.match.secondPlayer
+	fp := player{
+		c:    c.match.firstPlayer,
+		card: &c.match.fpCard,
+	}
+	sp := player{
+		c:    c.match.secondPlayer,
+		card: &c.match.spCard,
+	}
+	var me, opponent *player
+	if c.lobbyOwner {
+		me = &fp
+		opponent = &sp
 	} else {
-		playerCard = &c.match.spCard
-		opponentCard = &c.match.fpCard
-		opponent = c.match.firstPlayer
+		me = &sp
+		opponent = &fp
 	}
-
-	var faceUp, opponentFaceUp bool
 
 	lastRound := c.match.m.GetLastRound()
 	if lastRound != nil {
-		faceUp = isFirstPlayer && lastRound.Effects.Has(domain.SPSpyPlayed) || !isFirstPlayer && lastRound.Effects.Has(domain.FPSpyPlayed)
-		opponentFaceUp = isFirstPlayer && lastRound.Effects.Has(domain.FPSpyPlayed) || !isFirstPlayer && lastRound.Effects.Has(domain.SPSpyPlayed)
+		fp.faceUp = lastRound.Effects.Has(domain.SPSpyPlayed)
+		sp.faceUp = lastRound.Effects.Has(domain.FPSpyPlayed)
 
-		if opponentFaceUp && opponentCard == nil {
+		if opponent.faceUp && *opponent.card == nil {
 			c.respErr(errors.New("you can't put a card first after spy played"))
 			return
 		}
 	}
 
-	*playerCard = card
+	card, err := c.match.putCard(c.lobbyOwner, args)
+	if err != nil {
+		c.respErr(err)
+		return
+	}
+	*me.card = card
 
 	c.respOk("")
-	opponent.cardPut(faceUp, (*playerCard).ID)
+	opponent.c.cardPut(me.faceUp, (*me.card).ID)
 
-	if *opponentCard != nil {
-		round, err := c.match.m.PlayRound(*card, **opponentCard)
+	if *opponent.card != nil {
+		round, err := c.match.m.PlayRound(**fp.card, **sp.card)
 		if err != nil {
 			c.respErr(err)
 			return
 		}
 		switch round.Result {
 		case domain.FPWR:
-			c.roundEnded(brp.WinRound, (*opponentCard).ID)
-			opponent.roundEnded(brp.LoseRound, card.ID)
+			fp.c.roundEnded(brp.WinRound, (*sp.card).ID)
+			sp.c.roundEnded(brp.LoseRound, (*fp.card).ID)
 		case domain.SPWR:
-			c.roundEnded(brp.LoseRound, (*opponentCard).ID)
-			opponent.roundEnded(brp.WinRound, card.ID)
+			fp.c.roundEnded(brp.LoseRound, (*sp.card).ID)
+			sp.c.roundEnded(brp.WinRound, (*fp.card).ID)
 		case domain.Hold:
-			c.roundEnded(brp.HoldRound, (*opponentCard).ID)
-			opponent.roundEnded(brp.HoldRound, card.ID)
+			fp.c.roundEnded(brp.HoldRound, (*sp.card).ID)
+			sp.c.roundEnded(brp.HoldRound, (*fp.card).ID)
 		case domain.FPWG:
-			c.roundEnded(brp.WinGame, (*opponentCard).ID)
-			opponent.roundEnded(brp.LoseGame, card.ID)
+			fp.c.roundEnded(brp.WinGame, (*sp.card).ID)
+			sp.c.roundEnded(brp.LoseGame, (*fp.card).ID)
 		case domain.SPWG:
-			c.roundEnded(brp.LoseGame, (*opponentCard).ID)
-			opponent.roundEnded(brp.WinGame, card.ID)
+			fp.c.roundEnded(brp.LoseGame, (*sp.card).ID)
+			sp.c.roundEnded(brp.WinGame, (*fp.card).ID)
 		case domain.Draw:
-			c.roundEnded(brp.DrawGame, (*opponentCard).ID)
-			opponent.roundEnded(brp.DrawGame, card.ID)
+			fp.c.roundEnded(brp.DrawGame, (*sp.card).ID)
+			sp.c.roundEnded(brp.DrawGame, (*fp.card).ID)
 		}
-		*playerCard = nil
-		*opponentCard = nil
+		*fp.card = nil
+		*sp.card = nil
+		log.Printf("SCORE: %d - %d\n", c.match.m.FPScore, c.match.m.SPScore)
 	}
 }
