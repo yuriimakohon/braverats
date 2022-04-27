@@ -5,12 +5,15 @@ import (
 	"braverats/client/gui"
 
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/widget"
 )
 
 type match struct {
 	gui      *gui.Match
 	playerIn bool
+	matchResult
 }
 
 func (app *App) initMatchScene() {
@@ -24,9 +27,40 @@ func (app *App) initMatchScene() {
 	app.gui.AddScene(gui.GIDMatch, matchContainer)
 }
 
+type matchResult struct {
+	sub binding.DataListener
+	res brp.RoundResult
+}
+
+func (m *matchResult) Set(result brp.RoundResult) {
+	switch result {
+	case brp.DrawGame, brp.LoseGame, brp.WinGame:
+		m.res = result
+		m.sub.DataChanged()
+	}
+}
+
+func (m *matchResult) AddListener(listener binding.DataListener) {
+	m.sub = listener
+}
+
+func (m matchResult) RemoveListener(listener binding.DataListener) {
+	m.sub = nil
+}
+
 func (app *App) initMatchDialog() {
-	matchDialog := dialog.NewConfirm("Match", "", func(ok bool) {
-	}, app.gui.W)
+	message := binding.NewString()
+	app.match.matchResult.AddListener(binding.NewDataListener(func() {
+		switch app.match.matchResult.res {
+		case brp.WinGame:
+			message.Set("You won the match")
+		case brp.LoseGame:
+			message.Set("You loosed the match")
+		case brp.DrawGame:
+			message.Set("Match is draw")
+		}
+	}))
+	matchDialog := dialog.NewCustom("Match", "close", widget.NewLabelWithData(message), app.gui.W)
 	app.gui.AddDialog(gui.GIDDialMatchEnd, matchDialog)
 }
 
@@ -85,12 +119,9 @@ func (app *App) RoundEnded(packet brp.Packet) {
 		app.gui.SendNotification("You win this round", "")
 		app.match.gui.RemoveEnemyTableCard(1)
 		app.match.gui.PutCardOnEnemyTable(enemyCardID)
-	case brp.WinGame:
-		app.gui.ShowDialog(gui.GIDDialLobby)
-		app.match.gui.RemoveEnemyTableCard(1)
-		app.match.gui.PutCardOnEnemyTable(enemyCardID)
-	case brp.LoseGame:
-		app.gui.ShowDialog(gui.GIDDialLobby)
+	default:
+		app.match.matchResult.Set(roundResult)
+		app.gui.ShowDialog(gui.GIDDialMatchEnd)
 		app.match.gui.RemoveEnemyTableCard(1)
 		app.match.gui.PutCardOnEnemyTable(enemyCardID)
 	}
