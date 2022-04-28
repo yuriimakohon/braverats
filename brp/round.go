@@ -3,11 +3,11 @@ package brp
 type RoundResult uint8
 
 const (
-	WinRound RoundResult = iota
-	LoseRound
-	HoldRound
-	WinGame
-	LoseGame
+	WonRound RoundResult = iota
+	LoosedRound
+	HeldRound
+	WonGame
+	LoosedGame
 	DrawGame
 )
 

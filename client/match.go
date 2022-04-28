@@ -38,7 +38,7 @@ type matchResult struct {
 
 func (m *matchResult) Set(result brp.RoundResult) {
 	switch result {
-	case brp.DrawGame, brp.LoseGame, brp.WinGame:
+	case brp.DrawGame, brp.LoosedGame, brp.WonGame:
 		m.res = result
 		m.sub.DataChanged()
 	}
@@ -56,9 +56,9 @@ func (app *App) initMatchDialog() {
 	message := binding.NewString()
 	app.match.matchResult.AddListener(binding.NewDataListener(func() {
 		switch app.match.matchResult.res {
-		case brp.WinGame:
+		case brp.WonGame:
 			message.Set("You won the match")
-		case brp.LoseGame:
+		case brp.LoosedGame:
 			message.Set("You loosed the match")
 		case brp.DrawGame:
 			message.Set("Match is draw")
@@ -117,11 +117,11 @@ func (app *App) RoundEnded(packet brp.Packet) {
 	app.match.gui.PutCardOnEnemyTable(enemyCardID)
 	app.match.gui.RedrawTable(roundResult)
 	switch roundResult {
-	case brp.HoldRound:
+	case brp.HeldRound:
 		app.gui.SendNotification("Hold", "Round is held")
-	case brp.LoseRound:
+	case brp.LoosedRound:
 		app.gui.SendNotification("Lose", "You loosed this round")
-	case brp.WinRound:
+	case brp.WonRound:
 		app.gui.SendNotification("Win", "You won this round")
 	default:
 		app.match.matchResult.Set(roundResult)

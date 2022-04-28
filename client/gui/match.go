@@ -155,14 +155,14 @@ func (m *Match) RedrawTable(result brp.RoundResult) {
 		m.PlayerHand.Enable()
 	}
 	switch result {
-	case brp.HoldRound:
+	case brp.HeldRound:
 		m.HoldCards()
 		m.roundsOnHold++
-	case brp.WinRound, brp.WinGame:
+	case brp.WonRound, brp.WonGame:
 		m.PlayerWonCard(m.roundsOnHold + 1)
 		m.EnemyLoseCard(m.roundsOnHold + 1)
 		m.roundsOnHold = 0
-	case brp.LoseRound, brp.LoseGame:
+	case brp.LoosedRound, brp.LoosedGame:
 		m.PlayerLoseCard(m.roundsOnHold + 1)
 		m.EnemyWonCard(m.roundsOnHold + 1)
 		m.roundsOnHold = 0

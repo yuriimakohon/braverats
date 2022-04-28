@@ -207,20 +207,20 @@ func (c *client) putCard(args []byte) {
 		}
 		switch round.Result {
 		case domain.FPWR:
-			fp.c.roundEnded(brp.WinRound, (*sp.card).ID)
-			sp.c.roundEnded(brp.LoseRound, (*fp.card).ID)
+			fp.c.roundEnded(brp.WonRound, (*sp.card).ID)
+			sp.c.roundEnded(brp.LoosedRound, (*fp.card).ID)
 		case domain.SPWR:
-			fp.c.roundEnded(brp.LoseRound, (*sp.card).ID)
-			sp.c.roundEnded(brp.WinRound, (*fp.card).ID)
+			fp.c.roundEnded(brp.LoosedRound, (*sp.card).ID)
+			sp.c.roundEnded(brp.WonRound, (*fp.card).ID)
 		case domain.Hold:
-			fp.c.roundEnded(brp.HoldRound, (*sp.card).ID)
-			sp.c.roundEnded(brp.HoldRound, (*fp.card).ID)
+			fp.c.roundEnded(brp.HeldRound, (*sp.card).ID)
+			sp.c.roundEnded(brp.HeldRound, (*fp.card).ID)
 		case domain.FPWG:
-			fp.c.roundEnded(brp.WinGame, (*sp.card).ID)
-			sp.c.roundEnded(brp.LoseGame, (*fp.card).ID)
+			fp.c.roundEnded(brp.WonGame, (*sp.card).ID)
+			sp.c.roundEnded(brp.LoosedGame, (*fp.card).ID)
 		case domain.SPWG:
-			fp.c.roundEnded(brp.LoseGame, (*sp.card).ID)
-			sp.c.roundEnded(brp.WinGame, (*fp.card).ID)
+			fp.c.roundEnded(brp.LoosedGame, (*sp.card).ID)
+			sp.c.roundEnded(brp.WonGame, (*fp.card).ID)
 		case domain.Draw:
 			fp.c.roundEnded(brp.DrawGame, (*sp.card).ID)
 			sp.c.roundEnded(brp.DrawGame, (*fp.card).ID)
