@@ -11,8 +11,8 @@ import (
 type Match struct {
 	scene *fyne.Container
 
-	enemyHandContainer  *fyne.Container
-	playerHandContainer *fyne.Container
+	PlayerHand *Hand
+	EnemyHand  *Hand
 
 	showCard             *ShowCard
 	playerTableContainer *fyne.Container
@@ -25,6 +25,9 @@ func NewMatch(parentScene *fyne.Container) *Match {
 	enemyHandContainer := container.NewHBox()
 	playerHandContainer := container.NewHBox()
 
+	playerHand := NewHand(playerHandContainer)
+	enemyHand := NewHand(enemyHandContainer)
+
 	playerTableContainer := container.NewHBox()
 	enemyTableContainer := container.NewHBox()
 	tableContainer := container.New(tableLayout{}, enemyTableContainer, playerTableContainer)
@@ -36,8 +39,8 @@ func NewMatch(parentScene *fyne.Container) *Match {
 
 	return &Match{
 		scene:                parentScene,
-		enemyHandContainer:   enemyHandContainer,
-		playerHandContainer:  playerHandContainer,
+		PlayerHand:           playerHand,
+		EnemyHand:            enemyHand,
 		showCard:             showCard,
 		playerTableContainer: playerTableContainer,
 		enemyTableContainer:  enemyTableContainer,
@@ -45,8 +48,8 @@ func NewMatch(parentScene *fyne.Container) *Match {
 }
 
 func (m *Match) ClearMatch() {
-	clearContainer(m.enemyHandContainer)
-	clearContainer(m.playerHandContainer)
+	clearContainer(m.PlayerHand.container)
+	clearContainer(m.EnemyHand.container)
 	clearContainer(m.playerTableContainer)
 	clearContainer(m.enemyTableContainer)
 }
@@ -62,12 +65,13 @@ func (m *Match) AddPlayerHandCards(f func(id brp.CardID) bool, ids ...brp.CardID
 		card := NewPlayerCard(id, false)
 		card.OnTap = func() {
 			m.PutCardOnPlayerTable(card.CardID)
+			m.PlayerHand.Disable()
 			if f(card.CardID) {
 				m.showCard.Hide()
-				m.playerHandContainer.Remove(card)
-				m.playerHandContainer.Refresh()
+				m.PlayerHand.RemoveCard(card)
 			} else {
 				m.RemovePlayerTableCard(1)
+				m.PlayerHand.Enable()
 			}
 		}
 		card.OnMouseIn = func() {
@@ -76,7 +80,7 @@ func (m *Match) AddPlayerHandCards(f func(id brp.CardID) bool, ids ...brp.CardID
 		card.OnMouseOut = func() {
 			m.showCard.Hide()
 		}
-		m.playerHandContainer.Add(card)
+		m.PlayerHand.AddCard(card)
 	}
 }
 
@@ -115,7 +119,7 @@ func (m *Match) PutCardOnEnemyTable(id brp.CardID) {
 
 func (m *Match) AddEnemyHandCards(count uint8) {
 	for i := uint8(0); i < count; i++ {
-		m.enemyHandContainer.Add(NewCard(brp.CardUnknown, false))
+		m.EnemyHand.AddCard(NewCard(brp.CardUnknown, false))
 	}
 }
 
@@ -124,9 +128,7 @@ func (m *Match) RemovePlayerTableCard(count uint8) {
 }
 
 func (m *Match) RemoveEnemyHandCard(count uint8) {
-	for i := uint8(0); i < count; i++ {
-		m.enemyHandContainer.Remove(m.enemyHandContainer.Objects[0])
-	}
+	m.EnemyHand.PopCards(count)
 }
 
 func (m *Match) RemoveEnemyTableCard(count uint8) {
@@ -144,6 +146,14 @@ func removeTableCard(container *fyne.Container, count uint8) {
 }
 
 func (m *Match) RedrawTable(result brp.RoundResult) {
+	lastPlayerCard := m.playerTableContainer.Objects[len(m.playerTableContainer.Objects)-1].(*TableCard)
+	lastEnemyCard := m.enemyTableContainer.Objects[len(m.enemyTableContainer.Objects)-1].(*TableCard)
+
+	if lastPlayerCard.Card.CardID == brp.CardSpy && lastEnemyCard.CardID != brp.CardSpy {
+		m.PlayerHand.Disable()
+	} else {
+		m.PlayerHand.Enable()
+	}
 	switch result {
 	case brp.HoldRound:
 		m.HoldCards()
@@ -173,11 +183,11 @@ func (m *Match) PlayerWonCard(count uint8) {
 }
 
 func (m *Match) EnemyLoseCard(count uint8) {
-	setTranslucency(m.enemyTableContainer, count, 0.4)
+	setTranslucency(m.enemyTableContainer, count, 0.6)
 }
 
 func (m *Match) PlayerLoseCard(count uint8) {
-	setTranslucency(m.playerTableContainer, count, 0.4)
+	setTranslucency(m.playerTableContainer, count, 0.6)
 }
 
 func setTranslucency(tableContainer *fyne.Container, count uint8, translucency float64) {

@@ -96,7 +96,9 @@ func (app *App) CardPut(packet brp.Packet) {
 		return
 	}
 
-	app.match.gui.RemoveEnemyHandCard(1)
+	app.match.gui.PlayerHand.Enable()
+
+	app.match.gui.EnemyHand.PopCards(1)
 	if !faceUp {
 		app.match.gui.PutCardOnEnemyTable(brp.CardUnknown)
 	} else {
