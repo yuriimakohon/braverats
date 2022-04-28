@@ -12,7 +12,7 @@ Server accepts connections via tcp/ip and speaks with clients on BRP protocol.
 
 #### Run:
 
-`go run cmd/server/main.go`
+$ `go run cmd/server/main.go`
 
 Use `-port` flag for custom port (default is `3000`)
 
@@ -22,7 +22,7 @@ Client written on [fyne](https://github.com/fyne-io/fyne) GUI library
 
 #### Run:
 
-`go run cmd/client/main.go`
+$ `go run cmd/client/main.go`
 
 Use `-addr` flag to specify server address (default is `localhost:3000`)
 
@@ -87,8 +87,8 @@ Every request can be responded with **RESP_ERR**
 
 #### Types:
 
-| **Type**    | **Values**                                                                                                                                                  |
-|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Bool        | `true` `false`                                                                                                                                              |
+| **Type**    | **Values**                                                                                                                                                   |
+|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Bool        | `true` `false`                                                                                                                                               |
 | CardID      | `0` - Unknown<br/>`1` - Musician<br/>`2` - Princess<br/>`3` - Spy<br/>`4` - Assassin<br/>`5` - Ambassador<br/>`6` - Wizard<br/>`7` -General<br/>`8` - Prince |
-| RoundResult | `0` - Won round<br/>`1` - Loosed round<br/>`2` - Held round<br/>`4` - Won game<br/>`5` - Loosed game<br/>`6` - Draw game                                    |
+| RoundResult | `0` - Won round<br/>`1` - Loosed round<br/>`2` - Held round<br/>`4` - Won game<br/>`5` - Loosed game<br/>`6` - Draw game                                     |
