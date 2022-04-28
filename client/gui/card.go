@@ -132,8 +132,9 @@ func NewCard(id brp.CardID, team bool) *Card {
 
 type TableCard struct {
 	*Card
-	OnMouseIn  func()
-	OnMouseOut func()
+	ImageStdSize fyne.Size
+	OnMouseIn    func()
+	OnMouseOut   func()
 }
 
 func (t TableCard) MouseIn(event *desktop.MouseEvent) {
@@ -152,15 +153,19 @@ func (t TableCard) MouseMoved(event *desktop.MouseEvent) {
 }
 
 func OnMouseInTableStandard(card *TableCard) {
+	card.ImageStdSize = card.image.Size()
 	cardSize := card.Size()
-	card.image.Resize(fyne.NewSize(cardSize.Width*1.1, cardSize.Height*1.1))
-	imageSize := card.image.Size()
-	card.image.Move(fyne.NewPos(cardSize.Width/2-imageSize.Width/2, cardSize.Height/2-imageSize.Height/2))
+	newImageSize := card.ImageStdSize
+	newImageSize.Height *= float32(1.1)
+	newImageSize.Width *= float32(1.1)
+	card.image.Resize(newImageSize)
+	card.image.Move(fyne.NewPos(cardSize.Width/2-newImageSize.Width/2, cardSize.Height/2-newImageSize.Height/2))
 }
 
 func OnMouseOutTableStandard(card *TableCard) {
-	card.image.Resize(card.Size())
-	card.image.Move(fyne.NewPos(0, 0))
+	card.image.Resize(card.ImageStdSize)
+	cardSize := card.Size()
+	card.image.Move(fyne.NewPos(cardSize.Width/2-card.ImageStdSize.Width/2, cardSize.Height/2-card.ImageStdSize.Height/2))
 }
 
 func NewTableCard(id brp.CardID, team bool) *TableCard {

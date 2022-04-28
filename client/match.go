@@ -96,6 +96,7 @@ func (app *App) CardPut(packet brp.Packet) {
 		return
 	}
 
+	app.match.gui.RemoveEnemyHandCard(1)
 	if !faceUp {
 		app.match.gui.PutCardOnEnemyTable(brp.CardUnknown)
 	} else {
@@ -110,23 +111,18 @@ func (app *App) RoundEnded(packet brp.Packet) {
 		return
 	}
 
+	app.match.gui.RemoveEnemyTableCard(1)
+	app.match.gui.PutCardOnEnemyTable(enemyCardID)
+	app.match.gui.RedrawTable(roundResult)
 	switch roundResult {
 	case brp.HoldRound:
-		app.gui.SendNotification("Round is held", "")
-		app.match.gui.RemoveEnemyTableCard(1)
-		app.match.gui.PutCardOnEnemyTable(enemyCardID)
+		app.gui.SendNotification("Hold", "Round is held")
 	case brp.LoseRound:
-		app.gui.SendNotification("You lose this round", "")
-		app.match.gui.RemoveEnemyTableCard(1)
-		app.match.gui.PutCardOnEnemyTable(enemyCardID)
+		app.gui.SendNotification("Lose", "You loosed this round")
 	case brp.WinRound:
-		app.gui.SendNotification("You win this round", "")
-		app.match.gui.RemoveEnemyTableCard(1)
-		app.match.gui.PutCardOnEnemyTable(enemyCardID)
+		app.gui.SendNotification("Win", "You won this round")
 	default:
 		app.match.matchResult.Set(roundResult)
 		app.gui.ShowDialog(gui.GIDDialMatchEnd)
-		app.match.gui.RemoveEnemyTableCard(1)
-		app.match.gui.PutCardOnEnemyTable(enemyCardID)
 	}
 }
