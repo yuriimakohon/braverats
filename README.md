@@ -90,5 +90,5 @@ Every request can be responded with **RESP_ERR**
 | **Type**    | **Values**                                                                                                                                                   |
 |-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Bool        | `true` `false`                                                                                                                                               |
-| CardID      | `0` - Unknown<br/>`1` - Musician<br/>`2` - Princess<br/>`3` - Spy<br/>`4` - Assassin<br/>`5` - Ambassador<br/>`6` - Wizard<br/>`7` -General<br/>`8` - Prince |
+| CardID      | `0` - Unknown<br/>`1` - Musician<br/>`2` - Princess<br/>`3` - Spy<br/>`4` - Assassin<br/>`5` - Ambassador<br/>`6` - Wizard<br/>`7` - General<br/>`8` - Prince |
 | RoundResult | `0` - Won round<br/>`1` - Loosed round<br/>`2` - Held round<br/>`4` - Won game<br/>`5` - Loosed game<br/>`6` - Draw game                                     |
