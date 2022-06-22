@@ -35,11 +35,11 @@ Name of this protocol stands for "Brave Rats Protocol". It was developed special
 
 BRP works with 3 types of protocol`s messages called 'Tag':
 
-- Request - client send this message to server. Every request should expect appropriate request-tag.
+- Request - client send this message to server. Every request should expect appropriate response-tag.
 - Response - server response for client`s request.
 - Event - server send this messages to client when some events occured.
 
-#### Construction of the message:
+#### Message format:
 
 BRP message is simply stream of bytes separated by ending as delimiter `\r\n`  
 Every message starts with tag and followed by its payload data separated by spaces:  
