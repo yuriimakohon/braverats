@@ -18,7 +18,7 @@ Use `-port` flag for custom port (default is `3000`)
 
 ## Client
 
-Client written on [fyne](https://github.com/fyne-io/fyne) GUI library
+Client written with [fyne](https://github.com/fyne-io/fyne) GUI library
 
 #### Run:
 
