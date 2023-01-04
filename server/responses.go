@@ -6,7 +6,7 @@ import (
 )
 
 func (c *client) logResponse(tag brp.TAG, message string) {
-	log.Printf("[%s] reveives %s: %s\n", c.id, tag, message)
+	log.Printf("[%s](%s) receives %s: %s\n", c.id, c.name, tag, message)
 }
 
 func (c *client) respOk(message string) {
