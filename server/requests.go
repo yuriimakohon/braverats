@@ -143,6 +143,11 @@ func (c *client) startMatch() {
 	}
 	c.lobby.secondPlayer.match = c.match
 
+	if !c.match.firstPlayer.ready && !c.match.secondPlayer.ready {
+		c.respErr(errors.New("both players must be ready"))
+		return
+	}
+
 	log.Printf("client %s started match in %s lobby\n", c.id, c.lobby.name)
 	c.respOk("match started")
 	c.matchStarted()
@@ -218,15 +223,19 @@ func (c *client) putCard(args []byte) {
 		case domain.FPWG:
 			fp.c.roundEnded(brp.WonGame, (*sp.card).ID)
 			sp.c.roundEnded(brp.LoosedGame, (*fp.card).ID)
+			fp.c.ready = false
+			sp.c.ready = false
+			c.match = nil
 		case domain.SPWG:
 			fp.c.roundEnded(brp.LoosedGame, (*sp.card).ID)
 			sp.c.roundEnded(brp.WonGame, (*fp.card).ID)
+			fp.c.ready = false
+			sp.c.ready = false
 		case domain.Draw:
 			fp.c.roundEnded(brp.DrawGame, (*sp.card).ID)
 			sp.c.roundEnded(brp.DrawGame, (*fp.card).ID)
 		}
 		*fp.card = nil
 		*sp.card = nil
-		log.Printf("SCORE: %d - %d\n", c.match.m.FPScore, c.match.m.SPScore)
 	}
 }
