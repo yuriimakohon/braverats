@@ -51,7 +51,7 @@ func (app *App) init() {
 	gui.InitImages()
 	app.initLobbyDialog()
 	app.initMatchScene()
-	app.initMatchDialog()
+	app.initMatchEndDialog()
 	app.initGameMainMenuScene()
 }
 

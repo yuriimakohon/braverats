@@ -7,15 +7,11 @@ import (
 
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/dialog"
-	"fyne.io/fyne/v2/widget"
 )
 
 type match struct {
 	gui      *gui.Match
 	playerIn bool
-	matchResult
 }
 
 func (app *App) initMatchScene() {
@@ -31,41 +27,13 @@ func (app *App) initMatchScene() {
 	app.gui.AddScene(gui.GIDMatch, matchContainer)
 }
 
-type matchResult struct {
-	sub binding.DataListener
-	res brp.RoundResult
-}
-
-func (m *matchResult) Set(result brp.RoundResult) {
-	switch result {
-	case brp.DrawGame, brp.LoosedGame, brp.WonGame:
-		m.res = result
-		m.sub.DataChanged()
-	}
-}
-
-func (m *matchResult) AddListener(listener binding.DataListener) {
-	m.sub = listener
-}
-
-func (m matchResult) RemoveListener(listener binding.DataListener) {
-	m.sub = nil
-}
-
-func (app *App) initMatchDialog() {
-	message := binding.NewString()
-	app.match.matchResult.AddListener(binding.NewDataListener(func() {
-		switch app.match.matchResult.res {
-		case brp.WonGame:
-			message.Set("You won the match")
-		case brp.LoosedGame:
-			message.Set("You loosed the match")
-		case brp.DrawGame:
-			message.Set("Match is draw")
-		}
-	}))
-	matchDialog := dialog.NewCustom("Match", "close", widget.NewLabelWithData(message), app.gui.W)
-	app.gui.AddDialog(gui.GIDDialMatchEnd, matchDialog)
+func (app *App) initMatchEndDialog() {
+	matchEndDialog := gui.NewMatchEndDialog(&app.match.gui.MatchResult,
+		func() {
+			app.LeaveLobby()
+			app.gui.ShowScene(gui.GIDMainMenu)
+		}, app.gui.W)
+	app.gui.AddDialog(gui.GIDDialMatchEnd, matchEndDialog)
 }
 
 func (app *App) closeMatch() {
@@ -124,7 +92,7 @@ func (app *App) RoundEnded(packet brp.Packet) {
 	case brp.WonRound:
 		app.gui.SendNotification("Win", "You won this round")
 	default:
-		app.match.matchResult.Set(roundResult)
+		app.match.gui.MatchResult.Set(roundResult)
 		app.gui.ShowDialog(gui.GIDDialMatchEnd)
 	}
 }

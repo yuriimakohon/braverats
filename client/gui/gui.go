@@ -56,12 +56,9 @@ func (gui *GUI) AddDialog(gid GID, dialog dialog.Dialog) {
 }
 
 func (gui *GUI) ShowDialog(gid GID) {
-	if dial, ok := gui.dialogs[gid]; ok {
+	if dial, ok := gui.checkDialog(gid); ok {
 		dial.Show()
-		return
 	}
-	log.Println("dialog not found: ", gid)
-	return
 }
 
 func (gui *GUI) HideDialog(gid GID) {
@@ -83,12 +80,10 @@ func (gui *GUI) AddScene(gid GID, scene *fyne.Container) {
 }
 
 func (gui *GUI) ShowScene(gid GID) {
-	scene, ok := gui.checkScene(gid)
-	if !ok {
-		log.Println("scene not found: ", gid)
-		return
+	if scene, ok := gui.checkScene(gid); ok {
+		gui.W.SetContent(scene)
 	}
-	gui.W.SetContent(scene)
+
 }
 
 func (gui *GUI) checkScene(gid GID) (*fyne.Container, bool) {

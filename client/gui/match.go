@@ -3,6 +3,9 @@ package gui
 import "C"
 import (
 	"braverats/brp"
+	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/widget"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -18,7 +21,30 @@ type Match struct {
 	playerTableContainer *fyne.Container
 	enemyTableContainer  *fyne.Container
 
+	MatchResult matchResult
+
 	roundsOnHold uint8
+}
+
+type matchResult struct {
+	sub binding.DataListener
+	res brp.RoundResult
+}
+
+func (m *matchResult) Set(result brp.RoundResult) {
+	switch result {
+	case brp.DrawGame, brp.LoosedGame, brp.WonGame:
+		m.res = result
+		m.sub.DataChanged()
+	}
+}
+
+func (m *matchResult) AddListener(listener binding.DataListener) {
+	m.sub = listener
+}
+
+func (m matchResult) RemoveListener(listener binding.DataListener) {
+	m.sub = nil
 }
 
 func NewMatch(parentScene *fyne.Container) *Match {
@@ -196,4 +222,24 @@ func setTranslucency(tableContainer *fyne.Container, count uint8, translucency f
 		card := tableContainer.Objects[size-i].(*TableCard)
 		card.image.Translucency = translucency
 	}
+}
+
+func NewMatchEndDialog(matchResult *matchResult, onClosed func(), parent fyne.Window) dialog.Dialog {
+	message := binding.NewString()
+	matchResult.AddListener(binding.NewDataListener(func() {
+		switch matchResult.res {
+		case brp.WonGame:
+			message.Set("You won the match")
+		case brp.LoosedGame:
+			message.Set("You loosed the match")
+		case brp.DrawGame:
+			message.Set("Match is draw")
+		}
+	}))
+	label := widget.NewLabelWithData(message)
+	dial := dialog.NewCustom("Match", "Leave lobby", label, parent)
+
+	dial.SetOnClosed(func() { onClosed() })
+
+	return dial
 }

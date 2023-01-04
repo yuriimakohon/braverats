@@ -134,7 +134,7 @@ func (app *App) initLobbyDialog() {
 	dialogLobby := gui.NewLobbyDialog(
 		func(ready bool) { app.SetReadiness(ready) },
 		func() {
-			if app.lobby.playerIn && app.match == nil {
+			if app.lobby.playerIn && !app.match.playerIn {
 				app.LeaveLobby()
 			}
 		},
