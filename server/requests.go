@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func (c *client) setName(args []byte) {
+func (c *client) handleSetName(args []byte) {
 	if len(args) == 0 {
 		c.respErr(errors.New("player`s name can not be empty"))
 		return
@@ -19,7 +19,7 @@ func (c *client) setName(args []byte) {
 	c.respOk(fmt.Sprintf("name %q set", c.name))
 }
 
-func (c *client) createLobby(args []byte) {
+func (c *client) handleCreateLobby(args []byte) {
 	if c.lobby != nil {
 		c.respErr(errors.New("you are already in a lobby"))
 		return
@@ -45,7 +45,7 @@ func (c *client) createLobby(args []byte) {
 	c.respOk(fmt.Sprintf("lobby %q created", c.lobby.name))
 }
 
-func (c *client) joinLobby(args []byte) {
+func (c *client) handleJoinLobby(args []byte) {
 	if len(args) == 0 {
 		c.respErr(errors.New("lobby name can not be empty"))
 		return
@@ -66,11 +66,11 @@ func (c *client) joinLobby(args []byte) {
 	c.lobby.secondPlayer = c
 	log.Printf("client %s joined lobby %q\n", c.id, lobby.name)
 
-	c.lobby.firstPlayer.joinedLobby(c.name)
+	c.lobby.firstPlayer.eventJoinedLobby(c.name)
 	c.respLobby(c.lobby.firstPlayer.ready, c.lobby.firstPlayer.name)
 }
 
-func (c *client) leaveLobby() {
+func (c *client) handleLeaveLobby() {
 	if c.lobby == nil {
 		c.respErr(errors.New("you are not in a lobby"))
 		return
@@ -83,18 +83,18 @@ func (c *client) leaveLobby() {
 		c.lobbyOwner = false
 
 		if lobby.secondPlayer != nil {
-			lobby.secondPlayer.lobbyClosed()
+			lobby.secondPlayer.eventLobbyClosed()
 			lobby.removePlayer(lobby.secondPlayer.id)
 		}
 	} else {
-		lobby.firstPlayer.leftLobby(c.name)
+		lobby.firstPlayer.eventLeftLobby(c.name)
 	}
 
 	lobby.removePlayer(c.id)
 	c.respOk(fmt.Sprintf("left %q lobby", lobby.name))
 }
 
-func (c *client) setReadiness(args []byte) {
+func (c *client) handleSetReadiness(args []byte) {
 	if c.lobby == nil {
 		c.respErr(errors.New("you are not in a lobby"))
 		return
@@ -118,14 +118,14 @@ func (c *client) setReadiness(args []byte) {
 	if currentPlayer.ready != ready {
 		currentPlayer.ready = ready
 		if anotherPlayer != nil {
-			anotherPlayer.playerReadiness(ready)
+			anotherPlayer.eventPlayerReadiness(ready)
 		}
 	}
 
 	currentPlayer.respOk(fmt.Sprintf("readiness set to %t", ready))
 }
 
-func (c *client) startMatch() {
+func (c *client) handleStartMatch() {
 	if c.lobby == nil {
 		c.respErr(errors.New("you are not in lobby"))
 		return
@@ -150,11 +150,11 @@ func (c *client) startMatch() {
 
 	log.Printf("client %s started match in %s lobby\n", c.id, c.lobby.name)
 	c.respOk("match started")
-	c.matchStarted()
-	c.lobby.secondPlayer.matchStarted()
+	c.eventMatchStarted()
+	c.lobby.secondPlayer.eventMatchStarted()
 }
 
-func (c *client) putCard(args []byte) {
+func (c *client) handlePutCard(args []byte) {
 	if c.match == nil {
 		c.respErr(errors.New("you are not in a match"))
 		return
@@ -202,7 +202,7 @@ func (c *client) putCard(args []byte) {
 	*me.card = card
 
 	c.respOk("")
-	opponent.c.cardPut(me.faceUp, (*me.card).ID)
+	opponent.c.eventCardPut(me.faceUp, (*me.card).ID)
 
 	if *opponent.card != nil {
 		round, err := c.match.m.PlayRound(**fp.card, **sp.card)
@@ -212,28 +212,28 @@ func (c *client) putCard(args []byte) {
 		}
 		switch round.Result {
 		case domain.FPWR:
-			fp.c.roundEnded(brp.WonRound, (*sp.card).ID)
-			sp.c.roundEnded(brp.LoosedRound, (*fp.card).ID)
+			fp.c.eventRoundEnded(brp.WonRound, (*sp.card).ID)
+			sp.c.eventRoundEnded(brp.LoosedRound, (*fp.card).ID)
 		case domain.SPWR:
-			fp.c.roundEnded(brp.LoosedRound, (*sp.card).ID)
-			sp.c.roundEnded(brp.WonRound, (*fp.card).ID)
+			fp.c.eventRoundEnded(brp.LoosedRound, (*sp.card).ID)
+			sp.c.eventRoundEnded(brp.WonRound, (*fp.card).ID)
 		case domain.Hold:
-			fp.c.roundEnded(brp.HeldRound, (*sp.card).ID)
-			sp.c.roundEnded(brp.HeldRound, (*fp.card).ID)
+			fp.c.eventRoundEnded(brp.HeldRound, (*sp.card).ID)
+			sp.c.eventRoundEnded(brp.HeldRound, (*fp.card).ID)
 		case domain.FPWG:
-			fp.c.roundEnded(brp.WonGame, (*sp.card).ID)
-			sp.c.roundEnded(brp.LoosedGame, (*fp.card).ID)
+			fp.c.eventRoundEnded(brp.WonGame, (*sp.card).ID)
+			sp.c.eventRoundEnded(brp.LoosedGame, (*fp.card).ID)
 			fp.c.ready = false
 			sp.c.ready = false
 			c.match = nil
 		case domain.SPWG:
-			fp.c.roundEnded(brp.LoosedGame, (*sp.card).ID)
-			sp.c.roundEnded(brp.WonGame, (*fp.card).ID)
+			fp.c.eventRoundEnded(brp.LoosedGame, (*sp.card).ID)
+			sp.c.eventRoundEnded(brp.WonGame, (*fp.card).ID)
 			fp.c.ready = false
 			sp.c.ready = false
 		case domain.Draw:
-			fp.c.roundEnded(brp.DrawGame, (*sp.card).ID)
-			sp.c.roundEnded(brp.DrawGame, (*fp.card).ID)
+			fp.c.eventRoundEnded(brp.DrawGame, (*sp.card).ID)
+			sp.c.eventRoundEnded(brp.DrawGame, (*fp.card).ID)
 		}
 		*fp.card = nil
 		*sp.card = nil

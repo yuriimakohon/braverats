@@ -2,6 +2,7 @@ package server
 
 import (
 	"braverats/brp"
+	"errors"
 	"log"
 	"net"
 
@@ -28,6 +29,31 @@ func newClient(conn net.Conn, server *Server) *client {
 		name:   "player",
 		server: server,
 	}
+}
+
+func (c *client) handleRequest(packet brp.Packet) error {
+	if packet.Type != brp.TypeReq {
+		return errors.New("client sent a non request packet")
+	}
+
+	switch packet.Tag {
+	case brp.ReqSetName:
+		c.handleSetName(packet.Payload)
+	case brp.ReqCreateLobby:
+		c.handleCreateLobby(packet.Payload)
+	case brp.ReqJoinLobby:
+		c.handleJoinLobby(packet.Payload)
+	case brp.ReqLeaveLobby:
+		c.handleLeaveLobby()
+	case brp.ReqSetReadiness:
+		c.handleSetReadiness(packet.Payload)
+	case brp.ReqStartMatch:
+		c.handleStartMatch()
+	case brp.ReqPutCard:
+		c.handlePutCard(packet.Payload)
+	}
+
+	return nil
 }
 
 func (c *client) handleWriteErr(tag brp.TAG, err error) {

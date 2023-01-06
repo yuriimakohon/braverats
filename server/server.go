@@ -82,11 +82,11 @@ func (s *Server) removeClient(id uuid.UUID) {
 			delete(c.server.lobbies, lobby.name)
 
 			if lobby.secondPlayer != nil {
-				lobby.secondPlayer.lobbyClosed()
+				lobby.secondPlayer.eventLobbyClosed()
 				lobby.removePlayer(lobby.secondPlayer.id)
 			}
 		} else {
-			lobby.firstPlayer.leftLobby(c.name)
+			lobby.firstPlayer.eventLeftLobby(c.name)
 		}
 
 		lobby.removePlayer(c.id)
@@ -111,25 +111,10 @@ func (s *Server) handleConnection(conn net.Conn) {
 			client.respErr(err)
 			continue
 		}
-		s.handleReq(packet, client)
-	}
-}
-
-func (s *Server) handleReq(packet brp.Packet, c *client) {
-	switch packet.Tag {
-	case brp.ReqSetName:
-		c.setName(packet.Payload)
-	case brp.ReqCreateLobby:
-		c.createLobby(packet.Payload)
-	case brp.ReqJoinLobby:
-		c.joinLobby(packet.Payload)
-	case brp.ReqLeaveLobby:
-		c.leaveLobby()
-	case brp.ReqSetReadiness:
-		c.setReadiness(packet.Payload)
-	case brp.ReqStartMatch:
-		c.startMatch()
-	case brp.ReqPutCard:
-		c.putCard(packet.Payload)
+		err = client.handleRequest(packet)
+		if err != nil {
+			log.Printf("Error handling request from %s: %s\n", conn.RemoteAddr().String(), err)
+			client.respErr(err)
+		}
 	}
 }
