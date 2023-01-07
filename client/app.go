@@ -3,6 +3,7 @@ package client
 import (
 	"braverats/brp"
 	"braverats/client/gui"
+	"braverats/client/gui/theme"
 	"bufio"
 	"errors"
 	"fmt"
@@ -48,7 +49,7 @@ func (app *App) Start() {
 }
 
 func (app *App) init() {
-	gui.InitImages()
+	theme.Init()
 	app.initLobbyDialog()
 	app.initMatchScene()
 	app.initMatchEndDialog()

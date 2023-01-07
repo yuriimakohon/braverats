@@ -2,7 +2,7 @@ package gui
 
 import (
 	"braverats/brp"
-	"braverats/client/gui/assets"
+	"braverats/client/gui/theme"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -62,60 +62,59 @@ func (c *Card) SetMinSize(size fyne.Size) {
 }
 
 func NewCard(id brp.CardID, team bool) *Card {
-	var resource fyne.Resource
+	var image *canvas.Image
 	switch id {
 	default:
-		resource = assets.ResourceSuitPng
+		image = theme.Current().ImgCardSuit
 	case brp.CardMusician:
 		if team {
-			resource = assets.ResourceMusicianredPng
+			image = theme.Current().ImgCardMusicianRed
 			break
 		}
-		resource = assets.ResourceMusicianbluePng
+		image = theme.Current().ImgCardMusicianBlue
 	case brp.CardPrincess:
 		if team {
-			resource = assets.ResourcePrincessredPng
+			image = theme.Current().ImgCardPrincessRed
 			break
 		}
-		resource = assets.ResourcePrincessbluePng
+		image = theme.Current().ImgCardPrincessBlue
 	case brp.CardSpy:
 		if team {
-			resource = assets.ResourceSpyredPng
+			image = theme.Current().ImgCardSpyRed
 			break
 		}
-		resource = assets.ResourceSpybluePng
+		image = theme.Current().ImgCardSpyBlue
 	case brp.CardAssassin:
 		if team {
-			resource = assets.ResourceAssassinredPng
+			image = theme.Current().ImgCardAssassinRed
 			break
 		}
-		resource = assets.ResourceAssassinbluePng
+		image = theme.Current().ImgCardAssassinBlue
 	case brp.CardAmbassador:
 		if team {
-			resource = assets.ResourceAmbassadorredPng
+			image = theme.Current().ImgCardAmbassadorRed
 			break
 		}
-		resource = assets.ResourceAmbassadorbluePng
+		image = theme.Current().ImgCardAmbassadorBlue
 	case brp.CardWizard:
 		if team {
-			resource = assets.ResourceWizardredPng
+			image = theme.Current().ImgCardWizardRed
 			break
 		}
-		resource = assets.ResourceWizardbluePng
+		image = theme.Current().ImgCardWizardBlue
 	case brp.CardGeneral:
 		if team {
-			resource = assets.ResourceGeneralredPng
+			image = theme.Current().ImgCardGeneralRed
 			break
 		}
-		resource = assets.ResourceGeneralbluePng
+		image = theme.Current().ImgCardGeneralBlue
 	case brp.CardPrince:
 		if team {
-			resource = assets.ResourcePrinceredPng
+			image = theme.Current().ImgCardPrinceRed
 			break
 		}
-		resource = assets.ResourcePrincebluePng
+		image = theme.Current().ImgCardPrinceBlue
 	}
-	image := canvas.NewImageFromResource(resource)
 	image.ScaleMode = canvas.ImageScalePixels
 	image.FillMode = canvas.ImageFillContain
 
