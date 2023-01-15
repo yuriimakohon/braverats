@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	AssetsDir        = "~Desktop/braverats/client/assets"
 	gameClientTitle  = "Brave Rats"
 	GameWindowWidth  = 1024
 	GameWindowHeight = 768
