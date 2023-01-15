@@ -34,5 +34,5 @@ func Current() *Theme {
 func Init() {
 	initDefaultTheme()
 	initInscryptionTheme()
-	currentTheme = &inscryptionTheme
+	currentTheme = &defaultTheme
 }
